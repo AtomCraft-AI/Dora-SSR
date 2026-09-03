@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DoraSSR 教育版启动测试</title>
+	<style>
+		:root {
+			font-family: Inter, "Microsoft YaHei", system-ui, sans-serif;
+			color: #182033;
+			background: #eef3ff;
+		}
+		body {
+			min-height: 100vh;
+			margin: 0;
+			display: grid;
+			place-items: center;
+		}
+		main {
+			width: min(480px, calc(100% - 48px));
+			padding: 40px;
+			border: 1px solid #d6dff5;
+			border-radius: 24px;
+			background: white;
+			box-shadow: 0 20px 60px rgba(45, 67, 116, 0.14);
+		}
+		h1 { margin: 0 0 12px; font-size: 28px; }
+		p { margin: 0 0 28px; color: #5d6780; line-height: 1.7; }
+		.launch-button {
+			display: block;
+			padding: 15px 20px;
+			border-radius: 12px;
+			background: #315efb;
+			color: white;
+			font-weight: 700;
+			text-align: center;
+			text-decoration: none;
+		}
+		.hint { margin: 18px 0 0; font-size: 13px; }
+		code { color: #315efb; }
+	</style>
+</head>
+<body>
+	<main>
+		<h1>DoraSSR 教育版</h1>
+		<p>点击按钮启动本机教育版，并在服务就绪后打开 Web IDE。</p>
+		<a class="launch-button" href="dorassredu://open-webide">打开 DoraSSR 教育版</a>
+		<p class="hint">本地测试协议：<code>dorassredu://open-webide</code></p>
+	</main>
+</body>
+</html>
