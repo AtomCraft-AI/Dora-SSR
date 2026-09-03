@@ -2686,6 +2686,12 @@ HttpServer\post "/download", (req): success: false ->
 isDesktopPlatform = ->
 	App.platform in ["Linux", "Windows", "macOS"]
 
+HttpServer\get "/launcher/status", ->
+	return
+		success: true
+		edition: "education"
+		version: App.version
+
 getServerStatus = ->
 	import "Script.Dev.Entry"
 	running = Entry.getCurrentEntryStatus!
