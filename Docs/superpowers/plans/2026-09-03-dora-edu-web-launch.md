@@ -213,7 +213,7 @@ Invoke the protocol again and confirm no second Dora process is created for this
 - [ ] **Step 5: Serve the example for manual browser acceptance**
 
 ```powershell
-npx --yes serve Tools/DoraEduLauncher/web-example -l 8870
+node Tools/DoraEduLauncher/web-example/serve.mjs
 ```
 
 Expected: the page is reachable at `http://127.0.0.1:8870/`; clicking its button invokes the registered launcher. Browser-native external application confirmation remains a manual acceptance gate.

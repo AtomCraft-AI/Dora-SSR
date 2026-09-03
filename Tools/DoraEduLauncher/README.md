@@ -43,10 +43,10 @@ Start-Process 'dorassredu://open-webide'
 
 ## 测试网页
 
-如果本机有 Python，可在仓库根目录启动静态服务：
+在仓库根目录启动无第三方依赖的 Node 测试服务：
 
 ```powershell
-python -m http.server 8870 --directory Tools\DoraEduLauncher\web-example
+node Tools\DoraEduLauncher\web-example\serve.mjs
 ```
 
 然后访问 `http://127.0.0.1:8870/` 并点击按钮。不同浏览器可能显示“打开外部应用”的确认提示，这是预期的安全行为。
