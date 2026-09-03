@@ -83,6 +83,7 @@
 		"test:resource-tree-sync": "node scripts/test-resource-tree-sync.mjs",
 		"test:agent-doc-search": "node scripts/test-agent-doc-search.mjs",
 		"test:agent-virtual-log": "node scripts/test-agent-virtual-log.mjs",
+		"test:agent-education-skill": "node scripts/test-agent-education-skill.mjs",
 		"test:transpile-protocol": "node scripts/test-transpile-protocol.mjs",
 		"test:entry-list-cache": "node scripts/test-entry-list-cache.mjs",
 		"test:audio-preview": "node scripts/test-audio-preview.mjs",
