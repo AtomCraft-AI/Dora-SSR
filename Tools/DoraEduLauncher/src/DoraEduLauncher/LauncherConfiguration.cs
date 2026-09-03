@@ -60,10 +60,11 @@ public sealed record LauncherConfiguration(
             || !webIdeUri.IsLoopback
             || webIdeUri.Port != 8866
             || !string.IsNullOrEmpty(webIdeUri.UserInfo)
+            || webIdeUri.AbsolutePath != "/"
             || !string.IsNullOrEmpty(webIdeUri.Query)
             || !string.IsNullOrEmpty(webIdeUri.Fragment))
         {
-            throw new InvalidDataException("Web IDE 地址必须是端口 8866 上的 loopback HTTP 地址。");
+            throw new InvalidDataException("Web IDE 地址必须是端口 8866 上的 loopback HTTP 根地址。");
         }
 
         var startupTimeoutSeconds = file.StartupTimeoutSeconds ?? 15;

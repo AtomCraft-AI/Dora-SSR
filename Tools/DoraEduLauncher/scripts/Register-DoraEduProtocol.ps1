@@ -36,8 +36,8 @@ function Resolve-RequiredPath {
 	return (Resolve-Path -LiteralPath $LiteralPath).ProviderPath
 }
 
-if ($WebIdeUrl.Scheme -ne 'http' -or -not $WebIdeUrl.IsLoopback -or $WebIdeUrl.Port -ne 8866) {
-	throw 'WebIdeUrl 必须是端口 8866 上的 loopback HTTP 地址。'
+if ($WebIdeUrl.Scheme -ne 'http' -or -not $WebIdeUrl.IsLoopback -or $WebIdeUrl.Port -ne 8866 -or $WebIdeUrl.AbsolutePath -ne '/') {
+	throw 'WebIdeUrl 必须是端口 8866 上的 loopback HTTP 根地址。'
 }
 if ($WebIdeUrl.UserInfo -or $WebIdeUrl.Query -or $WebIdeUrl.Fragment) {
 	throw 'WebIdeUrl 不能包含用户信息、查询参数或片段。'

@@ -1,4 +1,7 @@
 using System.Text.Json;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 using DoraEduLauncher;
 
 internal static class Program
@@ -11,10 +14,15 @@ internal static class Program
             ("rejects untrusted protocol input", TestRejectsProtocolInput),
             ("loads and validates local configuration", TestLoadsConfiguration),
             ("rejects non-loopback Web IDE configuration", TestRejectsRemoteConfiguration),
+            ("rejects a non-root Web IDE path", TestRejectsNonRootConfiguration),
+            ("recognizes a refused HTTP connection as unavailable", TestConnectionRefused),
+            ("recognizes a timeout without a local listener as unavailable", TestTimeoutWithoutListener),
+            ("treats other HTTP failures as a port conflict", TestOtherHttpFailures),
             ("opens an already running education server", TestAlreadyRunning),
             ("starts Dora and waits for education readiness", TestColdStart),
             ("refuses a different service on port 8866", TestPortConflict),
             ("reports a startup timeout", TestStartupTimeout),
+            ("enforces the overall startup timeout", TestOverallStartupTimeout),
         };
 
         var failed = 0;
@@ -80,6 +88,51 @@ internal static class Program
         return Task.CompletedTask;
     }
 
+    private static Task TestRejectsNonRootConfiguration()
+    {
+        using var fixture = new ConfigurationFixture("http://127.0.0.1:8866/not-root");
+        AssertThrows<InvalidDataException>(() => LauncherConfiguration.Load(fixture.ConfigurationPath));
+        return Task.CompletedTask;
+    }
+
+    private static async Task TestConnectionRefused()
+    {
+        using var httpClient = new HttpClient(new ThrowingHttpHandler(
+            new HttpRequestException("refused", new SocketException((int)SocketError.ConnectionRefused))));
+        var probe = await new DoraStatusClient(httpClient, new Uri("http://127.0.0.1:8866/"))
+            .ProbeAsync(CancellationToken.None);
+        AssertEqual(ProbeKind.Unavailable, probe.Kind);
+    }
+
+    private static async Task TestTimeoutWithoutListener()
+    {
+        using var httpClient = new HttpClient(new ThrowingHttpHandler(
+            new TaskCanceledException("response timeout")));
+        var probe = await new DoraStatusClient(
+            httpClient,
+            new Uri("http://127.0.0.1:8866/"),
+            () => false).ProbeAsync(CancellationToken.None);
+        AssertEqual(ProbeKind.Unavailable, probe.Kind);
+    }
+
+    private static async Task TestOtherHttpFailures()
+    {
+        foreach (var testCase in new (Exception Exception, Func<bool>? LocalPortIsListening)[]
+        {
+            (new HttpRequestException("reset", new SocketException((int)SocketError.ConnectionReset)), null),
+            (new TaskCanceledException("response timeout"), () => true),
+        })
+        {
+            using var httpClient = new HttpClient(new ThrowingHttpHandler(testCase.Exception));
+            var probe = await new DoraStatusClient(
+                httpClient,
+                new Uri("http://127.0.0.1:8866/"),
+                testCase.LocalPortIsListening)
+                .ProbeAsync(CancellationToken.None);
+            AssertEqual(ProbeKind.OtherService, probe.Kind);
+        }
+    }
+
     private static async Task TestAlreadyRunning()
     {
         var probe = new FakeProbe(ProbeResult.Education("1.9.2.12"));
@@ -143,6 +196,24 @@ internal static class Program
         AssertContains("超时", result.Message);
         AssertEqual(1, platform.StartCount);
         AssertEqual(0, platform.OpenCount);
+    }
+
+    private static async Task TestOverallStartupTimeout()
+    {
+        var platform = new FakePlatform();
+        var workflow = new LauncherWorkflow(
+            TestConfiguration(),
+            new DelayedUnavailableProbe(TimeSpan.FromMilliseconds(150)),
+            platform,
+            new SystemAsyncDelay());
+        var stopwatch = Stopwatch.StartNew();
+
+        var result = await workflow.RunAsync(CancellationToken.None);
+
+        stopwatch.Stop();
+        AssertFalse(result.Success, result.Message);
+        AssertTrue(stopwatch.Elapsed < TimeSpan.FromMilliseconds(650),
+            $"startup timeout took {stopwatch.Elapsed.TotalMilliseconds:F0}ms");
     }
 
     private static LauncherConfiguration TestConfiguration() => new(
@@ -249,5 +320,28 @@ internal static class Program
     private sealed class ImmediateDelay : IAsyncDelay
     {
         public Task DelayAsync(TimeSpan duration, CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    private sealed class DelayedUnavailableProbe(TimeSpan delay) : IDoraStatusProbe
+    {
+        private bool _first = true;
+
+        public async Task<ProbeResult> ProbeAsync(CancellationToken cancellationToken)
+        {
+            if (_first)
+            {
+                _first = false;
+                return ProbeResult.Unavailable();
+            }
+            await Task.Delay(delay, cancellationToken);
+            return ProbeResult.Unavailable();
+        }
+    }
+
+    private sealed class ThrowingHttpHandler(Exception exception) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken) => Task.FromException<HttpResponseMessage>(exception);
     }
 }

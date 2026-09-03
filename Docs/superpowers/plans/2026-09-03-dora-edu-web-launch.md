@@ -28,7 +28,7 @@
 **Interfaces:**
 - Produces: `GET /launcher/status -> { success: true, edition: "education", version: string }`
 
-- [ ] **Step 1: Write the failing endpoint assertion**
+- [x] **Step 1: Write the failing endpoint assertion**
 
 Run a PowerShell request against the current server and assert that `edition` is `education`:
 
@@ -37,11 +37,11 @@ $status = Invoke-RestMethod -Method Get -Uri http://127.0.0.1:8866/launcher/stat
 if ($status.edition -ne 'education') { throw 'education launcher endpoint unavailable' }
 ```
 
-- [ ] **Step 2: Verify it fails**
+- [x] **Step 2: Verify it fails**
 
 Expected: request returns HTTP 404 because the route does not exist.
 
-- [ ] **Step 3: Add the minimal route**
+- [x] **Step 3: Add the minimal route**
 
 Add to `WebServer.yue` before the existing server status helpers:
 
@@ -55,11 +55,11 @@ HttpServer\get "/launcher/status", ->
 
 Regenerate the checked-in `WebServer.lua` using the Dora CLI build command so runtime and source stay synchronized.
 
-- [ ] **Step 4: Restart Dora and verify the endpoint**
+- [x] **Step 4: Restart Dora and verify the endpoint**
 
 Expected: HTTP 200 and JSON fields `success=true`, `edition=education`, and a non-empty `version`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add Assets/Script/Dev/WebServer.yue Assets/Script/Dev/WebServer.lua
@@ -83,7 +83,7 @@ git commit -m "feat: 添加教育版启动状态端点"
 - Consumes: `GET /launcher/status` from Task 1.
 - Produces: `ProtocolRequest.TryParse(string[] args, out ProtocolRequest?, out string)`; `LauncherConfiguration.Load(string path)`; `DoraStatusClient.ProbeAsync`; `LauncherWorkflow.RunAsync`.
 
-- [ ] **Step 1: Write the dependency-free failing test harness**
+- [x] **Step 1: Write the dependency-free failing test harness**
 
 Create a console test project referencing the launcher and cover:
 
@@ -95,7 +95,7 @@ AssertFalse(ProtocolRequest.TryParse(["dorassredu://open-webide?asset=C:/tmp"], 
 
 Add fake probe/platform implementations to assert that an education probe opens the browser without starting Dora, an unavailable probe starts Dora once with the configured asset path, another service does not start Dora, and timeout returns failure.
 
-- [ ] **Step 2: Run the harness and verify it fails to compile**
+- [x] **Step 2: Run the harness and verify it fails to compile**
 
 ```powershell
 dotnet run --project Tools/DoraEduLauncher/tests/DoraEduLauncher.Tests/DoraEduLauncher.Tests.csproj
@@ -103,11 +103,11 @@ dotnet run --project Tools/DoraEduLauncher/tests/DoraEduLauncher.Tests/DoraEduLa
 
 Expected: build errors for missing launcher types.
 
-- [ ] **Step 3: Implement the minimal launcher core**
+- [x] **Step 3: Implement the minimal launcher core**
 
 Implement exact URI allowlisting, JSON configuration validation, the three-state HTTP probe, structured Dora process arguments, loopback URL opening, timeout polling, and named-mutex serialization. Use `System.Text.Json`, `HttpClient`, and `ProcessStartInfo`; add no package references.
 
-- [ ] **Step 4: Run tests and build**
+- [x] **Step 4: Run tests and build**
 
 ```powershell
 dotnet run --project Tools/DoraEduLauncher/tests/DoraEduLauncher.Tests/DoraEduLauncher.Tests.csproj
@@ -116,7 +116,7 @@ dotnet build Tools/DoraEduLauncher/src/DoraEduLauncher/DoraEduLauncher.csproj -c
 
 Expected: all named tests print `PASS`; build reports zero warnings and zero errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add Tools/DoraEduLauncher/src Tools/DoraEduLauncher/tests
@@ -135,7 +135,7 @@ git commit -m "feat: 添加 DoraSSR EDU 协议启动器"
 - Consumes: published `DoraEduLauncher.exe` from Task 2.
 - Produces: current-user `dorassredu` handler and `%LOCALAPPDATA%\DoraSSREDU\launcher.json`.
 
-- [ ] **Step 1: Write registration validation commands**
+- [x] **Step 1: Write registration validation commands**
 
 ```powershell
 $command = (Get-Item 'HKCU:\Software\Classes\dorassredu\shell\open\command').GetValue('')
@@ -145,11 +145,11 @@ if (-not $command -or -not $config.doraExecutable -or -not $config.assetPath) { 
 
 Use the registry key default value through `Get-Item`/`GetValue('')` in the actual verification command to avoid provider-property ambiguity.
 
-- [ ] **Step 2: Implement register and unregister scripts**
+- [x] **Step 2: Implement register and unregister scripts**
 
 The register script validates and resolves all input paths, writes JSON with PowerShell JSON serialization, creates the URL Protocol marker, and writes the quoted `"<launcher>" "%1"` command. The unregister script removes only `HKCU\Software\Classes\dorassredu`; configuration removal requires an explicit `-RemoveConfiguration` switch.
 
-- [ ] **Step 3: Add the browser example and usage guide**
+- [x] **Step 3: Add the browser example and usage guide**
 
 The page contains:
 
@@ -159,7 +159,7 @@ The page contains:
 
 Document build, publish, registration, local static hosting, verification, and cleanup commands with concrete paths as parameters rather than machine-specific committed values.
 
-- [ ] **Step 4: Publish and register the local build**
+- [x] **Step 4: Publish and register the local build**
 
 ```powershell
 dotnet publish Tools/DoraEduLauncher/src/DoraEduLauncher/DoraEduLauncher.csproj -c Release -r win-x64 --self-contained false
@@ -168,7 +168,7 @@ dotnet publish Tools/DoraEduLauncher/src/DoraEduLauncher/DoraEduLauncher.csproj 
 
 Expected: registry command targets the published launcher and the JSON config contains resolved local paths.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add Tools/DoraEduLauncher/scripts Tools/DoraEduLauncher/web-example Tools/DoraEduLauncher/README.md
@@ -183,11 +183,11 @@ git commit -m "feat: 添加网页唤起注册与示例"
 **Interfaces:**
 - Consumes: protocol handler, launcher, Dora executable, education assets, and Web IDE.
 
-- [ ] **Step 1: Stop only the verified Dora test process**
+- [x] **Step 1: Stop only the verified Dora test process**
 
 Resolve the listener owner and command line first. Stop it only if the executable and asset path match this test environment, then verify port 8866 is released.
 
-- [ ] **Step 2: Invoke the protocol**
+- [x] **Step 2: Invoke the protocol**
 
 ```powershell
 Start-Process 'dorassredu://open-webide'
@@ -195,7 +195,7 @@ Start-Process 'dorassredu://open-webide'
 
 Expected: the configured Dora executable starts with `--asset E:\Projects\AtomGameAssociation\Dora-SSR-EDU\Assets`.
 
-- [ ] **Step 3: Verify education identity and Web IDE**
+- [x] **Step 3: Verify education identity and Web IDE**
 
 Poll up to 15 seconds:
 
@@ -206,7 +206,7 @@ Invoke-WebRequest -UseBasicParsing -Uri http://127.0.0.1:8866/
 
 Expected: identity has `edition=education`, and Web IDE returns HTTP 200.
 
-- [ ] **Step 4: Verify repeat invocation**
+- [x] **Step 4: Verify repeat invocation**
 
 Invoke the protocol again and confirm no second Dora process is created for this configured executable and asset path.
 
@@ -217,3 +217,5 @@ node Tools/DoraEduLauncher/web-example/serve.mjs
 ```
 
 Expected: the page is reachable at `http://127.0.0.1:8870/`; clicking its button invokes the registered launcher. Browser-native external application confirmation remains a manual acceptance gate.
+
+Current local verification: the page returns HTTP 200; protocol cold start returns `edition=education`, the Web IDE returns HTTP 200, and repeat protocol invocation keeps one Dora process. A human browser click is intentionally left open for final acceptance.

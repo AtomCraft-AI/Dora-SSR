@@ -31,6 +31,21 @@ try {
 	New-Item -ItemType File -Path $launcherPath | Out-Null
 	New-Item -ItemType File -Path $doraPath | Out-Null
 	New-Item -ItemType Directory -Path $assetPath | Out-Null
+	$invalidUrlAccepted = $true
+	try {
+		& $registerScript `
+			-LauncherPath $launcherPath `
+			-DoraExecutable $doraPath `
+			-AssetPath $assetPath `
+			-Scheme ($scheme + 'invalid') `
+			-ConfigurationDirectory $configurationDirectory `
+			-WebIdeUrl 'http://127.0.0.1:8866/not-root' `
+			-WhatIf | Out-Null
+	}
+	catch {
+		$invalidUrlAccepted = $false
+	}
+	if ($invalidUrlAccepted) { throw 'Register script accepted a non-root Web IDE URL.' }
 
 	& $registerScript `
 		-LauncherPath $launcherPath `

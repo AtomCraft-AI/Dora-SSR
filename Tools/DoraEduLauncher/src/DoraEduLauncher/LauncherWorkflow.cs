@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace DoraEduLauncher;
 
 public interface ILauncherPlatform
@@ -43,12 +45,44 @@ public sealed class LauncherWorkflow(
         }
 
         platform.StartDora(configuration.DoraExecutable, configuration.AssetPath);
+        var stopwatch = Stopwatch.StartNew();
         var attempts = Math.Max(1, (int)Math.Ceiling(
             configuration.StartupTimeout.TotalMilliseconds / configuration.PollInterval.TotalMilliseconds));
         for (var attempt = 0; attempt < attempts; attempt++)
         {
-            await delay.DelayAsync(configuration.PollInterval, cancellationToken);
-            var probe = await statusProbe.ProbeAsync(cancellationToken);
+            var remaining = configuration.StartupTimeout - stopwatch.Elapsed;
+            if (remaining <= TimeSpan.Zero) break;
+
+            using (var delayTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            {
+                delayTimeout.CancelAfter(remaining);
+                try
+                {
+                    await delay.DelayAsync(Min(configuration.PollInterval, remaining), delayTimeout.Token);
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+
+            remaining = configuration.StartupTimeout - stopwatch.Elapsed;
+            if (remaining <= TimeSpan.Zero) break;
+
+            ProbeResult probe;
+            using (var probeTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+            {
+                probeTimeout.CancelAfter(remaining);
+                try
+                {
+                    probe = await statusProbe.ProbeAsync(probeTimeout.Token);
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
+
             if (probe.Kind == ProbeKind.Education)
             {
                 platform.OpenUrl(configuration.WebIdeUri);
@@ -62,6 +96,8 @@ public sealed class LauncherWorkflow(
 
         return LaunchResult.Failed("等待 DoraSSR 教育版启动超时。请检查 Dora 窗口和日志后重试。");
     }
+
+    private static TimeSpan Min(TimeSpan left, TimeSpan right) => left <= right ? left : right;
 
     private static LaunchResult PortConflict(string detail) => LaunchResult.Failed(
         $"端口 8866 已被其他 Dora 版本或应用占用（{detail}）。请关闭占用程序后重试。");

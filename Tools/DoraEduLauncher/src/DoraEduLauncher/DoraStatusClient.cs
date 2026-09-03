@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text.Json;
 
 namespace DoraEduLauncher;
@@ -21,9 +24,14 @@ public interface IDoraStatusProbe
     Task<ProbeResult> ProbeAsync(CancellationToken cancellationToken);
 }
 
-public sealed class DoraStatusClient(HttpClient httpClient, Uri webIdeUri) : IDoraStatusProbe
+public sealed class DoraStatusClient(
+    HttpClient httpClient,
+    Uri webIdeUri,
+    Func<bool>? localPortIsListening = null) : IDoraStatusProbe
 {
     private readonly Uri _statusUri = new(webIdeUri, "launcher/status");
+    private readonly Func<bool> _localPortIsListening = localPortIsListening
+        ?? (() => IsLoopbackPortListening(webIdeUri.Port));
 
     public async Task<ProbeResult> ProbeAsync(CancellationToken cancellationToken)
     {
@@ -45,17 +53,53 @@ public sealed class DoraStatusClient(HttpClient httpClient, Uri webIdeUri) : IDo
                 ? ProbeResult.Education(status.Version ?? "unknown")
                 : ProbeResult.OtherService("响应不是 DoraSSR 教育版");
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex) when (IsConnectionRefused(ex))
         {
             return ProbeResult.Unavailable();
         }
+        catch (HttpRequestException ex)
+        {
+            return ProbeResult.OtherService($"状态请求失败：{ex.Message}");
+        }
         catch (TaskCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
-            return ProbeResult.Unavailable();
+            return _localPortIsListening()
+                ? ProbeResult.OtherService("状态请求超时")
+                : ProbeResult.Unavailable();
         }
         catch (JsonException)
         {
             return ProbeResult.OtherService("响应不是有效的教育版状态 JSON");
+        }
+    }
+
+    private static bool IsConnectionRefused(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is SocketException { SocketErrorCode: SocketError.ConnectionRefused })
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsLoopbackPortListening(int port)
+    {
+        try
+        {
+            return IPGlobalProperties.GetIPGlobalProperties()
+                .GetActiveTcpListeners()
+                .Any(endpoint => endpoint.Port == port
+                    && (IPAddress.IsLoopback(endpoint.Address)
+                        || endpoint.Address.Equals(IPAddress.Any)
+                        || endpoint.Address.Equals(IPAddress.IPv6Any)));
+        }
+        catch
+        {
+            return true;
         }
     }
 
