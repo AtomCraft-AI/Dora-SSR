@@ -1,1747 +1,2095 @@
--- [tsx]: Feed.tsx
-local ____lualib = require("lualib_bundle") -- 1
-local __TS__ArrayFind = ____lualib.__TS__ArrayFind -- 1
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap -- 1
-local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew -- 1
-local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush -- 1
-local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread -- 1
-local ____exports = {} -- 1
-local ____DoraX = require("DoraX") -- 1
-local React = ____DoraX.React -- 1
-local reference = ____DoraX.reference -- 1
-local toNode = ____DoraX.toNode -- 1
-local ____Dora = require("Dora") -- 2
-local App = ____Dora.App -- 2
-local Director = ____Dora.Director -- 2
-local Ease = ____Dora.Ease -- 2
-local HttpServer = ____Dora.HttpServer -- 2
-local Move = ____Dora.Move -- 2
-local Node = ____Dora.Node -- 2
-local sleep = ____Dora.sleep -- 2
-local thread = ____Dora.thread -- 2
-local Vec2 = ____Dora.Vec2 -- 2
-local ____Mascot = require("Dev.Mobile.Mascot") -- 3
-local DoraMascot = ____Mascot.DoraMascot -- 3
-local ____Gamepad = require("Dev.Mobile.Gamepad") -- 4
-local attachGamepad = ____Gamepad.attachGamepad -- 4
-local findGamepadNode = ____Gamepad.findGamepadNode -- 4
-local ____Accessibility = require("Dev.Mobile.Accessibility") -- 5
-local mobileFontScale = ____Accessibility.mobileFontScale -- 5
-local ____FeedModel = require("Dev.Mobile.FeedModel") -- 6
-local getCoverScales = ____FeedModel.getCoverScales -- 6
-local getReusableCardIndices = ____FeedModel.getReusableCardIndices -- 6
-local normalizeFeedIndex = ____FeedModel.normalizeFeedIndex -- 6
-local resolveDiscoverRefreshTab = ____FeedModel.resolveDiscoverRefreshTab -- 6
-local resolveFeedGesture = ____FeedModel.resolveFeedGesture -- 6
-local resolveFeedLocation = ____FeedModel.resolveFeedLocation -- 6
-local stableCoverColor = ____FeedModel.stableCoverColor -- 6
-local ____TextInput = require("Dev.Mobile.TextInput") -- 7
-local createTextInput = ____TextInput.createTextInput -- 7
-local ____Controls = require("Dev.Mobile.Controls") -- 8
-local MobileButton = ____Controls.MobileButton -- 8
-local MobileChoiceButton = ____Controls.MobileChoiceButton -- 8
-local MobileNewButton = ____Controls.MobileNewButton -- 8
-local MobilePanelSurface = ____Controls.MobilePanelSurface -- 8
-local ____Visual = require("Dev.Mobile.Visual") -- 9
-local roundedRectVerts = ____Visual.roundedRectVerts -- 9
-local RoundedStencil = ____Visual.RoundedStencil -- 9
-local RoundedSurface = ____Visual.RoundedSurface -- 9
-local VerticalGradient = ____Visual.VerticalGradient -- 9
-local ____PackagePanel = require("Dev.Mobile.PackagePanel") -- 10
-local startPackagePanel = ____PackagePanel.startPackagePanel -- 10
-local ____ProjectIndex = require("Dev.Mobile.ProjectIndex") -- 11
-local ProjectIndex = ____ProjectIndex.ProjectIndex -- 11
-local colors = { -- 35
-	background = 4278914322, -- 36
-	panel = 4279572770, -- 37
-	panelRaised = 4280297010, -- 38
-	text = 4294242792, -- 39
-	muted = 4289245117, -- 40
-	brand = 4294954035, -- 41
-	border = 4281613128, -- 42
-	danger = 4294929259 -- 43
-} -- 43
-local fontName = "sarasa-mono-sc-regular" -- 46
-local createSheetHeight = 304 -- 47
-local createInputHeight = 44 -- 48
-local createInputTop = 140 -- 49
-local function conciseDescription(text, limit) -- 51
-	local length = (utf8.len(text)) or 0 -- 52
-	if length <= limit then -- 52
-		return text -- 53
-	end -- 53
-	local stop = utf8.offset(text, limit + 1) or #text + 1 -- 54
-	return string.sub(text, 1, stop - 1) .. "…" -- 55
-end -- 51
-local function Cover(props) -- 58
-	local file = props.entry.bannerFile -- 59
-	local function scaleSprite(sprite, mode) -- 60
-		local scales = getCoverScales(sprite.width, sprite.height, props.width, props.height) -- 61
-		sprite.scaleX = scales[mode] -- 62
-		sprite.scaleY = scales[mode] -- 63
-	end -- 60
-	local ____React_createElement_5 = React.createElement -- 60
-	local ____temp_3 = { -- 60
-		x = props.x, -- 60
-		y = props.y, -- 60
-		width = props.width, -- 60
-		height = props.height, -- 60
-		anchorX = 0, -- 60
-		anchorY = 0 -- 60
-	} -- 60
-	local ____React_createElement_result_4 = React.createElement( -- 60
-		RoundedSurface, -- 66
-		{ -- 66
-			width = props.width, -- 66
-			height = props.height, -- 66
-			radius = 22, -- 66
-			topColor = stableCoverColor(props.entry.id), -- 66
-			bottomColor = 4279310115, -- 66
-			shadow = true -- 66
-		} -- 66
-	) -- 66
-	local ____file_0 -- 68
-	if file then -- 68
-		____file_0 = React.createElement( -- 68
-			"clip-node", -- 68
-			{ -- 68
-				width = props.width, -- 68
-				height = props.height, -- 68
-				anchorX = 0, -- 68
-				anchorY = 0, -- 68
-				stencil = React.createElement(RoundedStencil, {width = props.width, height = props.height, radius = 22}) -- 68
-			}, -- 68
-			React.createElement( -- 68
-				"sprite", -- 68
-				{ -- 68
-					file = file, -- 68
-					x = props.width / 2 - 5, -- 68
-					y = props.height / 2, -- 68
-					opacity = 0.08, -- 68
-					onMount = function(sprite) return scaleSprite(sprite, "cover") end -- 68
-				} -- 68
-			), -- 68
-			React.createElement( -- 68
-				"sprite", -- 68
-				{ -- 68
-					file = file, -- 68
-					x = props.width / 2 + 5, -- 68
-					y = props.height / 2, -- 68
-					opacity = 0.08, -- 68
-					onMount = function(sprite) return scaleSprite(sprite, "cover") end -- 68
-				} -- 68
-			), -- 68
-			React.createElement( -- 68
-				"sprite", -- 68
-				{ -- 68
-					file = file, -- 68
-					x = props.width / 2, -- 68
-					y = props.height / 2 - 5, -- 68
-					opacity = 0.08, -- 68
-					onMount = function(sprite) return scaleSprite(sprite, "cover") end -- 68
-				} -- 68
-			), -- 68
-			React.createElement( -- 68
-				"draw-node", -- 68
-				{x = props.width / 2, y = props.height / 2}, -- 68
-				React.createElement("rect-shape", {width = props.width, height = props.height, fillColor = 2953514258}) -- 68
-			), -- 68
-			React.createElement( -- 68
-				"sprite", -- 68
-				{ -- 68
-					file = file, -- 68
-					x = props.width / 2, -- 68
-					y = props.height / 2, -- 68
-					onMount = function(sprite) return scaleSprite(sprite, "contain") end -- 68
-				} -- 68
-			) -- 68
-		) -- 68
-	else -- 68
-		____file_0 = React.createElement( -- 68
-			"label", -- 68
-			{ -- 68
-				x = props.width / 2, -- 68
-				y = props.height / 2 + 10, -- 68
-				fontName = fontName, -- 68
-				fontSize = math.floor(math.max( -- 68
-					22, -- 80
-					math.min(34, props.width / 12) -- 80
-				)), -- 80
-				text = props.entry.title, -- 80
-				textWidth = props.width - 40, -- 80
-				color3 = 16052712 -- 80
-			} -- 80
-		) -- 80
-	end -- 80
-	local ____file_1 -- 85
-	if file then -- 85
-		____file_1 = nil -- 85
-	else -- 85
-		____file_1 = React.createElement("label", { -- 85
-			x = props.width / 2, -- 85
-			y = 30, -- 85
-			fontName = fontName, -- 85
-			fontSize = 14, -- 85
-			text = "DORA SSR · REMIXABLE", -- 85
-			color3 = 16763955 -- 85
-		}) -- 85
-	end -- 85
-	local ____file_2 -- 93
-	if file then -- 93
-		____file_2 = nil -- 93
-	else -- 93
-		____file_2 = React.createElement(DoraMascot, {state = "idle", x = props.width - 46, y = 64, size = 42}) -- 93
-	end -- 93
-	return ____React_createElement_5( -- 65
-		"node", -- 65
-		____temp_3, -- 65
-		____React_createElement_result_4, -- 65
-		____file_0, -- 65
-		____file_1, -- 65
-		____file_2, -- 65
-		React.createElement(RoundedSurface, { -- 65
-			width = props.width, -- 65
-			height = props.height, -- 65
-			radius = 22, -- 65
-			fillColor = 0, -- 65
-			borderWidth = 1, -- 65
-			borderColor = 4282074454 -- 65
-		}) -- 65
-	) -- 65
-end -- 58
-function ____exports.startMobileFeed(options) -- 98
-	local submitCreate, render, refreshDiscover -- 98
-	local getLocalEntries = options.getLocalEntries -- 99
-	local getDiscoverEntries = options.getDiscoverEntries -- 100
-	local onPlay = options.onPlay -- 101
-	local onRemix = options.onRemix -- 102
-	local prepare = options.prepare -- 103
-	local syncDiscover = options.syncDiscover -- 104
-	local canShare = App.platform == "Android" or App.platform == "iOS" -- 105
-	local zh = (string.match(App.locale, "^zh")) ~= nil -- 106
-	local tab = "local" -- 107
-	local index = 0 -- 108
-	local drag = Vec2.zero -- 109
-	local dragAxis = "none" -- 110
-	local discoverError = "" -- 111
-	local preparing = false -- 112
-	local transitioning = false -- 113
-	local prepareStatus = "" -- 114
-	local prepareProgress = 0 -- 115
-	local catalogSyncing = false -- 116
-	local catalogStatus = "" -- 117
-	local catalogStatusView -- 118
-	local repairResourceId = "" -- 119
-	local userSelectedTab = false -- 120
-	local active = true -- 121
-	local leaving = false -- 122
-	local packagePanel -- 123
-	local createOpen = false -- 124
-	local projectIndexOpen = false -- 125
-	local creating = false -- 126
-	local createName = "" -- 127
-	local createLanguage = "typescript" -- 128
-	local dismissedCreateComposition = false -- 129
-	local createError = "" -- 130
-	local gamepadUsed = false -- 131
-	local returnEntry = options.initialEntry -- 132
-	local ____opt_6 = options.initialEntries -- 132
-	local ____temp_10 = ____opt_6 and ____opt_6["local"] -- 134
-	local ____opt_8 = options.initialEntries -- 134
-	local rememberedEntries = {["local"] = ____temp_10, discover = ____opt_8 and ____opt_8.discover} -- 133
-	local cardRef = reference() -- 137
-	local indexRef = reference() -- 138
-	local createInputRef = reference() -- 139
-	local discover = getDiscoverEntries() -- 140
-	local ____local = getLocalEntries() -- 141
-	if #discover == 0 then -- 141
-		discoverError = zh and "资源目录暂不可用" or "Catalog is unavailable" -- 144
-	end -- 144
-	local initialLocation = resolveFeedLocation(____local, discover, returnEntry) -- 146
-	tab = initialLocation.tab -- 147
-	index = initialLocation.index -- 148
-	local host = Node() -- 150
-	host.tag = "mobile-feed" -- 151
-	host.scaleX = App.devicePixelRatio -- 152
-	host.scaleY = App.devicePixelRatio -- 153
-	host:addTo(Director.systemUI) -- 154
-	local function isActive() -- 156
-		return active and not leaving and host.parent ~= nil -- 156
-	end -- 156
-	local function entries() -- 158
-		return tab == "discover" and discover or ____local -- 158
-	end -- 158
-	local function current() -- 159
-		return entries()[normalizeFeedIndex( -- 159
-			index, -- 159
-			#entries() -- 159
-		) + 1] -- 159
-	end -- 159
-	local rememberedEntryKey = "" -- 160
-	local function rememberCurrent() -- 161
-		local item = current() -- 162
-		if not item or not options.onCurrentEntryChanged then -- 162
-			return -- 163
-		end -- 163
-		local key = (((((item.kind .. "\n") .. item.id) .. "\n") .. (item.workDir or "")) .. "\n") .. (item.fileName or "") -- 164
-		if key == rememberedEntryKey then -- 164
-			return -- 165
-		end -- 165
-		rememberedEntryKey = key -- 166
-		rememberedEntries[item.kind] = item -- 167
-		options.onCurrentEntryChanged(item) -- 168
-	end -- 161
-	local function canEditCreate() -- 170
-		return createOpen and not creating and isActive() and host.visible and HttpServer.wsConnectionCount == 0 -- 170
-	end -- 170
-	local createInput = createTextInput({ -- 171
-		fontSize = math.floor(16 * mobileFontScale), -- 172
-		singleLine = true, -- 173
-		background = colors.background, -- 174
-		getText = function() return createName end, -- 175
-		setText = function(text) -- 176
-			createName = text -- 176
-		end, -- 176
-		getPlaceholder = function() return zh and "例如：星际花园" or "For example: Star Garden" end, -- 177
-		isEnabled = canEditCreate, -- 178
-		onReturn = function() -- 179
-			submitCreate() -- 179
-			return true -- 179
-		end -- 179
-	}) -- 179
-	local blurCreateInput = createInput.blur -- 181
-	local function closeCreate() -- 182
-		if creating then -- 182
-			return -- 183
-		end -- 183
-		blurCreateInput() -- 184
-		createOpen = false -- 185
-		createName = "" -- 186
-		createError = "" -- 187
-		render() -- 188
-	end -- 182
-	local function openCreate() -- 190
-		if not options.createProject or preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then -- 190
-			return -- 191
-		end -- 191
-		projectIndexOpen = false -- 192
-		createOpen = true -- 193
-		createLanguage = "typescript" -- 194
-		createName = "" -- 195
-		dismissedCreateComposition = false -- 196
-		createError = "" -- 197
-		render() -- 198
-		createInput.deferFocus() -- 199
-	end -- 190
-	local function openProjectIndex() -- 201
-		if preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then -- 201
-			return -- 202
-		end -- 202
-		if tab == "local" then -- 202
-			____local = getLocalEntries() -- 203
-		end -- 203
-		projectIndexOpen = true -- 204
-		render() -- 205
-	end -- 201
-	local function createErrorText(____error) -- 207
-		repeat -- 207
-			local ____switch31 = ____error -- 207
-			local ____cond31 = ____switch31 == "invalid-name" -- 207
-			if ____cond31 then -- 207
-				return zh and "请输入不含路径分隔符的项目名称" or "Enter a project name without path separators" -- 209
-			end -- 209
-			____cond31 = ____cond31 or ____switch31 == "target-existed" -- 209
-			if ____cond31 then -- 209
-				return zh and "已有同名项目，请换一个名称" or "A project with that name already exists" -- 210
-			end -- 210
-			____cond31 = ____cond31 or ____switch31 == "create-folder-failed" -- 210
-			if ____cond31 then -- 210
-				return zh and "无法创建项目目录，请检查工作目录后重试" or "Could not create the project folder; check the workspace and retry" -- 211
-			end -- 211
-			____cond31 = ____cond31 or ____switch31 == "create-entry-failed" -- 211
-			if ____cond31 then -- 211
-				return zh and "无法写入项目入口，未完成项目已回滚" or "Could not write the project entry; the incomplete project was rolled back" -- 212
-			end -- 212
-			____cond31 = ____cond31 or ____switch31 == "created-project-not-found" -- 212
-			if ____cond31 then -- 212
-				return zh and "项目已创建，但本地列表未能找到它，请返回后重试" or "The project was created but could not be found in Local; return and retry" -- 213
-			end -- 213
-			do -- 213
-				return zh and "创建失败，请重试" or "Project creation failed; try again" -- 214
-			end -- 214
-		until true -- 214
-	end -- 207
-	submitCreate = function() -- 217
-		if not options.createProject or creating or not createOpen or not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 then -- 217
-			return -- 218
-		end -- 218
-		if createInput.isComposing() then -- 218
-			return -- 219
-		end -- 219
-		creating = true -- 220
-		createError = "" -- 221
-		blurCreateInput() -- 222
-		render() -- 223
-		local result = options.createProject(createName, createLanguage) -- 224
-		if not isActive() then -- 224
-			return -- 225
-		end -- 225
-		creating = false -- 226
-		if not result.success then -- 226
-			createError = createErrorText(result.error) -- 228
-			render() -- 229
-			return -- 230
-		end -- 230
-		createOpen = false -- 232
-		createName = "" -- 233
-		____local = getLocalEntries() -- 234
-		returnEntry = result.entry -- 235
-		local location = resolveFeedLocation(____local, discover, result.entry) -- 236
-		tab = location.tab -- 237
-		index = location.index -- 238
-		render() -- 239
-		onRemix(result.entry) -- 240
-	end -- 217
-	local function openPackage(mode, path, pickOnOpen) -- 243
-		if pickOnOpen == nil then -- 243
-			pickOnOpen = false -- 243
-		end -- 243
-		if not isActive() or not host.visible or packagePanel or preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then -- 243
-			return -- 244
-		end -- 244
-		projectIndexOpen = false -- 245
-		packagePanel = startPackagePanel({ -- 246
-			mode = mode, -- 247
-			path = path, -- 247
-			pickOnOpen = pickOnOpen, -- 247
-			entry = current(), -- 247
-			onNew = openCreate, -- 248
-			onClosed = function() -- 249
-				packagePanel = nil -- 249
-			end, -- 249
-			onImported = function(entry, play) -- 250
-				if not isActive() then -- 250
-					return -- 251
-				end -- 251
-				____local = getLocalEntries(entry.workDir) -- 252
-				local imported = __TS__ArrayFind( -- 253
-					____local, -- 253
-					function(____, item) return item.workDir == entry.workDir end -- 253
-				) or entry -- 253
-				returnEntry = imported -- 254
-				local location = resolveFeedLocation(____local, discover, imported) -- 255
-				tab = "local" -- 256
-				index = location.index -- 256
-				render() -- 257
-				if play then -- 257
-					onPlay(imported) -- 258
-				end -- 258
-			end -- 250
-		}) -- 250
-	end -- 243
-	local receiveElapsed = 0 -- 262
-	host:schedule(function(dt) -- 263
-		receiveElapsed = receiveElapsed + dt -- 264
-		if receiveElapsed < 0.5 then -- 264
-			return false -- 265
-		end -- 265
-		receiveElapsed = 0 -- 266
-		if isActive() and host.visible and not packagePanel and not createOpen and not projectIndexOpen and not preparing and not transitioning and HttpServer.wsConnectionCount == 0 then -- 266
-			local path = options.takeReceivedFile and options.takeReceivedFile() or App:takeReceivedFile() -- 268
-			if path ~= "" then -- 268
-				openPackage("receive", path) -- 269
-			end -- 269
-		end -- 269
-		return false -- 271
-	end) -- 263
-	local function setTab(next) -- 274
-		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or creating then -- 274
-			return -- 275
-		end -- 275
-		userSelectedTab = true -- 276
-		returnEntry = nil -- 277
-		if tab == next then -- 277
-			return -- 278
-		end -- 278
-		if createOpen then -- 278
-			blurCreateInput() -- 280
-			createOpen = false -- 281
-			createName = "" -- 282
-			createError = "" -- 283
-		end -- 283
-		tab = next -- 285
-		local target = rememberedEntries[next] -- 286
-		local ____temp_11 -- 287
-		if target == nil then -- 287
-			____temp_11 = nil -- 287
-		else -- 287
-			____temp_11 = resolveFeedLocation(____local, discover, target) -- 287
-		end -- 287
-		local location = ____temp_11 -- 287
-		index = (location and location.tab) == next and location.index or 0 -- 288
-		render() -- 289
-	end -- 274
-	local function activate(action) -- 291
-		local item = current() -- 292
-		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or not item or preparing then -- 292
-			return -- 293
-		end -- 293
-		item.launchError = nil -- 294
-		local function done() -- 295
-			returnEntry = item -- 295
-			local ____temp_14 -- 295
-			if action == "play" then -- 295
-				____temp_14 = onPlay(item) -- 295
-			else -- 295
-				____temp_14 = onRemix(item) -- 295
-			end -- 295
-			return ____temp_14 -- 295
-		end -- 295
-		if item.kind == "local" or item.installed then -- 295
-			done() -- 296
-			return -- 296
-		end -- 296
-		preparing = true -- 297
-		prepareProgress = 0 -- 298
-		prepareStatus = zh and "准备安装…" or "Preparing install…" -- 299
-		render() -- 300
-		local repairIncomplete = repairResourceId == item.id -- 301
-		repairResourceId = "" -- 302
-		prepare( -- 303
-			item, -- 303
-			repairIncomplete, -- 303
-			function(progress, message) -- 303
-				if not isActive() then -- 303
-					return -- 304
-				end -- 304
-				prepareProgress = math.max( -- 305
-					0, -- 305
-					math.min(1, progress) -- 305
-				) -- 305
-				prepareStatus = message -- 306
-				render() -- 307
-			end, -- 303
-			function(success, ready, message, repairable) -- 308
-				if not isActive() then -- 308
-					return -- 309
-				end -- 309
-				preparing = false -- 310
-				if not success or not ready then -- 310
-					repairResourceId = repairable and item.id or "" -- 312
-					prepareStatus = message or (zh and "安装失败，点击按钮重试" or "Install failed; tap to retry") -- 313
-					render() -- 314
-					return -- 315
-				end -- 315
-				item.fileName = ready.fileName -- 317
-				item.workDir = ready.workDir -- 318
-				item.installed = true -- 319
-				prepareStatus = "" -- 320
-				if HttpServer.wsConnectionCount == 0 and host.visible then -- 320
-					done() -- 321
-				else -- 321
-					render() -- 322
-				end -- 322
-			end -- 308
-		) -- 308
-	end -- 291
-	local function commit(action) -- 326
-		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or transitioning then -- 326
-			return -- 327
-		end -- 327
-		if action == "play" or action == "remix" then -- 327
-			local card = cardRef.current -- 329
-			if card then -- 329
-				card.position = Vec2.zero -- 330
-			end -- 330
-		end -- 330
-		repeat -- 330
-			local ____switch67 = action -- 330
-			local ____cond67 = ____switch67 == "previous" or ____switch67 == "next" -- 330
-			if ____cond67 then -- 330
-				do -- 330
-					returnEntry = nil -- 335
-					local target = normalizeFeedIndex( -- 336
-						index + (action == "next" and 1 or -1), -- 336
-						#entries() -- 336
-					) -- 336
-					if target == index then -- 336
-						local card = cardRef.current -- 338
-						if card then -- 338
-							card:perform(Move(App.reducedMotion and 0 or 0.16, card.position, Vec2.zero, Ease.OutQuad)) -- 339
-						end -- 339
-						return -- 340
-					end -- 340
-					local duration = App.reducedMotion and 0 or 0.18 -- 342
-					local function finish() -- 343
-						if not isActive() then -- 343
-							return -- 344
-						end -- 344
-						index = target -- 345
-						transitioning = false -- 346
-						App:vibrate(0.012) -- 347
-						render() -- 348
-					end -- 343
-					local card = cardRef.current -- 350
-					if duration > 0 and card then -- 350
-						transitioning = true -- 352
-						card:perform(Move( -- 353
-							duration, -- 353
-							card.position, -- 353
-							Vec2(0, (action == "next" and 1 or -1) * App.safeArea.height), -- 353
-							Ease.OutQuad -- 353
-						)) -- 353
-						thread(function() -- 354
-							sleep(duration) -- 354
-							finish() -- 354
-						end) -- 354
-					else -- 354
-						finish() -- 355
-					end -- 355
-					return -- 356
-				end -- 356
-			end -- 356
-			____cond67 = ____cond67 or ____switch67 == "play" -- 356
-			if ____cond67 then -- 356
-				activate("play") -- 358
-				return -- 358
-			end -- 358
-			____cond67 = ____cond67 or ____switch67 == "remix" -- 358
-			if ____cond67 then -- 358
-				activate("remix") -- 359
-				return -- 359
-			end -- 359
-			do -- 359
-				return -- 360
-			end -- 360
-		until true -- 360
-	end -- 326
-	local function switchMode() -- 364
-		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or creating or createOpen or packagePanel or transitioning or not options.onSwitchMode then -- 364
-			return -- 365
-		end -- 365
-		leaving = true -- 366
-		options.onSwitchMode() -- 367
-	end -- 364
-	host:slot("SwitchUIMode", switchMode) -- 369
-	render = function() -- 370
-		if not isActive() then -- 370
-			return -- 371
-		end -- 371
-		catalogStatusView = nil -- 372
-		local safeContentWidth = App.safeArea.width - 40 -- 374
-		local shortLandscapeInputWidth = safeContentWidth - 12 - math.min( -- 375
-			300, -- 375
-			math.floor(safeContentWidth * 0.42) -- 375
-		) -- 375
-		local expectedInputWidth = App.safeArea.width >= 760 and App.safeArea.height < 500 and shortLandscapeInputWidth or safeContentWidth -- 376
-		local ____createOpen_17 = createOpen -- 377
-		if ____createOpen_17 then -- 377
-			local ____opt_15 = createInputRef.current -- 377
-			____createOpen_17 = (____opt_15 and ____opt_15.width) == expectedInputWidth -- 377
-		end -- 377
-		local keptInput = ____createOpen_17 and createInputRef.current or nil -- 377
-		local restoreFocus = createInput.isFocused() -- 378
-		if keptInput ~= nil then -- 378
-			keptInput:removeFromParent(false) -- 379
-		end -- 379
-		if not keptInput then -- 379
-			createInput.unmount() -- 381
-			createInputRef = reference() -- 382
-		end -- 382
-		local createPanelRef = reference() -- 384
-		host:removeAllChildren() -- 385
-		host.scaleX = App.devicePixelRatio -- 386
-		host.scaleY = App.devicePixelRatio -- 387
-		local ____App_visualSize_20 = App.visualSize -- 388
-		local width = ____App_visualSize_20.width -- 388
-		local height = ____App_visualSize_20.height -- 388
-		local safe = App.safeArea -- 389
-		local left = safe.left -- 390
-		local bottom = safe.bottom -- 391
-		local usableWidth = safe.width -- 392
-		local usableHeight = safe.height -- 393
-		local wide = usableWidth >= 760 -- 394
-		local shortLandscape = wide and usableHeight < 500 -- 395
-		local compact = not wide and usableHeight < 700 -- 396
-		local compactLandscape = compact and usableWidth > usableHeight and usableHeight < 520 -- 397
-		local landscapeTopLift = shortLandscape and 28 or 0 -- 398
-		local data = entries() -- 399
-		index = normalizeFeedIndex(index, #data) -- 400
-		local item = current() -- 401
-		rememberCurrent() -- 402
-		local coverWidth = wide and math.min(usableWidth * 0.54, 680) or usableWidth - 32 -- 403
-		local coverHeight = wide and math.min(usableHeight - 118, coverWidth * 0.72) or (compact and math.min(usableHeight * (compactLandscape and 0.43 or 0.49), coverWidth * 0.72) or math.min(usableHeight * 0.54, coverWidth * 1.12)) -- 404
-		local coverX = left + 16 -- 409
-		local coverY = wide and bottom + (usableHeight - coverHeight) / 2 - 12 + landscapeTopLift or bottom + usableHeight - coverHeight - 82 -- 410
-		local infoX = wide and coverX + coverWidth + 28 or left + 20 -- 411
-		local infoWidth = wide and usableWidth - coverWidth - 72 or usableWidth - 40 -- 412
-		local infoTop = wide and bottom + usableHeight - 122 + landscapeTopLift or coverY - (compactLandscape and 28 or 30) -- 413
-		local descriptionY = infoTop - (compactLandscape and 38 or 58) -- 414
-		local actionsY = bottom + (compactLandscape and 18 or 24) -- 415
-		local gestureHintY = bottom + (compactLandscape and 88 or 92) -- 416
-		local buttonWidth = wide and math.min(190, (infoWidth - 12) / 2) or (infoWidth - 12) / 2 -- 417
-		local fontScale = mobileFontScale -- 418
-		local cardIndices = getReusableCardIndices(index, #data) -- 419
-		local headerRenderOrder = 1000 -- 420
-		local ____toNode_59 = toNode -- 422
-		local ____React_createElement_58 = React.createElement -- 422
-		local ____array_57 = __TS__SparseArrayNew( -- 422
-			"node", -- 422
-			{ -- 422
-				tag = "mobile-feed-scene", -- 422
-				x = -width / 2, -- 422
-				y = -height / 2, -- 422
-				width = width, -- 422
-				height = height, -- 422
-				anchorX = 0, -- 422
-				anchorY = 0, -- 422
-				touchEnabled = true, -- 422
-				onTapBegan = function() -- 422
-					drag = Vec2.zero -- 432
-					dragAxis = "none" -- 433
-					local ____opt_21 = cardRef.current -- 433
-					if ____opt_21 ~= nil then -- 433
-						____opt_21:stopAllActions() -- 434
-					end -- 434
-					if indexRef.current then -- 434
-						indexRef.current.opacity = 1 -- 435
-					end -- 435
-				end, -- 431
-				onTapMoved = function(touch) -- 431
-					drag = drag:add(touch.delta) -- 438
-					if dragAxis == "none" and math.max( -- 438
-						math.abs(drag.x), -- 439
-						math.abs(drag.y) -- 439
-					) >= 12 then -- 439
-						dragAxis = math.abs(drag.x) > math.abs(drag.y) * 1.2 and "horizontal" or "vertical" -- 440
-					end -- 440
-					if cardRef.current then -- 440
-						local offset = dragAxis == "horizontal" and Vec2(drag.x * 0.18, 0) or (dragAxis == "vertical" and Vec2(0, drag.y * 0.12) or Vec2.zero) -- 443
-						cardRef.current.position = offset -- 444
-						if indexRef.current then -- 444
-							local headerBottom = bottom + usableHeight - 72 -- 446
-							local indexTop = coverY + coverHeight - 14 + offset.y -- 447
-							indexRef.current.opacity = dragAxis == "vertical" and math.max( -- 448
-								0, -- 449
-								math.min(1, (headerBottom - indexTop) / 16) -- 449
-							) or 1 -- 449
-						end -- 449
-					end -- 449
-				end, -- 437
-				onTapEnded = function() -- 437
-					local action = resolveFeedGesture(drag.x, drag.y, usableWidth, usableHeight) -- 455
-					drag = Vec2.zero -- 456
-					dragAxis = "none" -- 457
-					if indexRef.current then -- 457
-						indexRef.current.opacity = 1 -- 458
-					end -- 458
-					if action == "none" and cardRef.current then -- 458
-						local card = cardRef.current -- 460
-						card:perform(Move(App.reducedMotion and 0 or 0.16, card.position, Vec2.zero, Ease.OutQuad)) -- 461
-					end -- 461
-					commit(action) -- 463
-				end, -- 454
-				onMouseWheel = function(delta) return commit(delta.y > 0 and "previous" or "next") end -- 454
-			}, -- 454
-			React.createElement(VerticalGradient, {width = width, height = height, topColor = 4279310117, bottomColor = 4278716943}) -- 454
-		) -- 454
-		local ____React_createElement_55 = React.createElement -- 454
-		local ____temp_53 = {visible = not projectIndexOpen} -- 454
-		local ____createOpen_38 -- 469
-		if createOpen then -- 469
-			____createOpen_38 = nil -- 469
-		else -- 469
-			local ____temp_37 -- 469
-			if item ~= nil then -- 469
-				local ____React_createElement_36 = React.createElement -- 469
-				local ____array_35 = __TS__SparseArrayNew( -- 469
-					"node", -- 469
-					{tag = "mobile-feed-card-" .. item.id, ref = cardRef, key = (tab .. "-") .. item.id}, -- 469
-					__TS__ArrayMap( -- 470
-						cardIndices, -- 470
-						function(____, cardIndex) return React.createElement(Cover, { -- 470
-							key = (tab .. "-") .. data[cardIndex + 1].id, -- 470
-							entry = data[cardIndex + 1], -- 470
-							x = coverX, -- 470
-							y = coverY + (index - cardIndex) * usableHeight, -- 470
-							width = coverWidth, -- 470
-							height = coverHeight -- 470
-						}) end -- 470
-					), -- 470
-					React.createElement( -- 470
-						"node", -- 470
-						{ -- 470
-							tag = "mobile-feed-index", -- 470
-							ref = indexRef, -- 470
-							order = 10, -- 470
-							renderGroup = true, -- 470
-							x = coverX + coverWidth - 62, -- 470
-							y = coverY + coverHeight - 40, -- 470
-							width = 48, -- 470
-							height = 26, -- 470
-							anchorX = 0, -- 470
-							anchorY = 0, -- 470
-							touchEnabled = true, -- 470
-							swallowTouches = true, -- 470
-							onTapped = openProjectIndex -- 470
-						}, -- 470
-						React.createElement( -- 470
-							"clip-node", -- 470
-							{ -- 470
-								width = 48, -- 470
-								height = 26, -- 470
-								anchorX = 0, -- 470
-								anchorY = 0, -- 470
-								stencil = React.createElement(RoundedStencil, {width = 48, height = 26, radius = 13}) -- 470
-							}, -- 470
-							React.createElement( -- 470
-								"draw-node", -- 470
-								nil, -- 470
-								React.createElement( -- 470
-									"verts-shape", -- 470
-									{verts = { -- 470
-										{ -- 483
-											Vec2(0, 0), -- 483
-											3759281694 -- 483
-										}, -- 483
-										{ -- 483
-											Vec2(48, 0), -- 483
-											3759281694 -- 483
-										}, -- 483
-										{ -- 483
-											Vec2(48, 26), -- 483
-											3760730173 -- 483
-										}, -- 483
-										{ -- 484
-											Vec2(0, 0), -- 484
-											3759281694 -- 484
-										}, -- 484
-										{ -- 484
-											Vec2(48, 26), -- 484
-											3760730173 -- 484
-										}, -- 484
-										{ -- 484
-											Vec2(0, 26), -- 484
-											3760730173 -- 484
-										} -- 484
-									}} -- 484
-								) -- 484
-							) -- 484
-						), -- 484
-						React.createElement( -- 484
-							"draw-node", -- 484
-							{x = 0.5, y = 0.5}, -- 484
-							React.createElement( -- 484
-								"polygon-shape", -- 484
-								{ -- 484
-									verts = roundedRectVerts(47, 25, 12.5), -- 484
-									fillColor = 0, -- 484
-									borderWidth = 0.5, -- 484
-									borderColor = 2286967404 -- 484
-								} -- 484
-							) -- 484
-						), -- 484
-						React.createElement( -- 484
-							"draw-node", -- 484
-							{x = 18, y = 2}, -- 484
-							React.createElement( -- 484
-								"polygon-shape", -- 484
-								{ -- 484
-									verts = roundedRectVerts(12, 2, 1), -- 484
-									fillColor = colors.brand -- 484
-								} -- 484
-							) -- 484
-						), -- 484
-						React.createElement( -- 484
-							"label", -- 484
-							{ -- 484
-								x = 24, -- 484
-								y = 13, -- 484
-								fontName = fontName, -- 484
-								fontSize = 11, -- 484
-								text = (tostring(index + 1) .. " / ") .. tostring(#data), -- 484
-								color3 = 14146531 -- 484
-							} -- 484
-						) -- 484
-					), -- 484
-					React.createElement( -- 484
-						"label", -- 484
-						{ -- 484
-							tag = "mobile-feed-current-title", -- 484
-							x = infoX, -- 484
-							y = infoTop, -- 484
-							anchorX = 0, -- 484
-							anchorY = 0.5, -- 484
-							fontName = fontName, -- 484
-							fontSize = math.floor((wide and 30 or 25) * fontScale), -- 484
-							text = item.title, -- 484
-							textWidth = infoWidth - (item.kind == "local" and canShare and 92 or 0), -- 484
-							alignment = "Left", -- 484
-							color3 = 16052712 -- 484
-						} -- 484
-					) -- 484
-				) -- 484
-				local ____temp_23 -- 493
-				if item.kind == "local" and canShare then -- 493
-					____temp_23 = React.createElement( -- 493
-						MobileButton, -- 493
-						{ -- 493
-							tag = "mobile-feed-share", -- 493
-							x = infoX + infoWidth - 84, -- 493
-							y = infoTop - 18, -- 493
-							width = 84, -- 493
-							height = 36, -- 493
-							text = zh and "分享作品" or "Share", -- 493
-							fontSize = 13, -- 493
-							onTapped = function() return openPackage("share") end -- 493
-						} -- 493
-					) -- 493
-				else -- 493
-					____temp_23 = nil -- 493
-				end -- 493
-				__TS__SparseArrayPush( -- 493
-					____array_35, -- 493
-					____temp_23, -- 493
-					React.createElement( -- 493
-						"label", -- 493
-						{ -- 493
-							tag = "mobile-feed-description", -- 493
-							x = infoX, -- 493
-							y = descriptionY, -- 493
-							anchorX = 0, -- 493
-							anchorY = 0.5, -- 493
-							fontName = fontName, -- 493
-							fontSize = math.floor(15 * fontScale), -- 493
-							text = conciseDescription(item.description, wide and 80 or (compact and 28 or 42)), -- 493
-							textWidth = infoWidth, -- 493
-							alignment = "Left", -- 493
-							color3 = 11055037 -- 493
-						} -- 493
-					) -- 493
-				) -- 493
-				local ____temp_24 -- 496
-				if compact or shortLandscape then -- 496
-					____temp_24 = nil -- 496
-				else -- 496
-					____temp_24 = React.createElement( -- 496
-						"node", -- 496
-						{ -- 496
-							x = infoX, -- 496
-							y = infoTop - 118, -- 496
-							width = wide and 176 or 164, -- 496
-							height = 28, -- 496
-							anchorX = 0, -- 496
-							anchorY = 0 -- 496
-						}, -- 496
-						React.createElement(RoundedSurface, { -- 496
-							width = wide and 176 or 164, -- 496
-							height = 28, -- 496
-							radius = 14, -- 496
-							topColor = 1714436683, -- 496
-							bottomColor = 1712857131, -- 496
-							borderWidth = 1, -- 496
-							borderColor = 2288020349 -- 496
-						}), -- 496
-						React.createElement("label", { -- 496
-							x = 12, -- 496
-							y = 14, -- 496
-							anchorX = 0, -- 496
-							fontName = fontName, -- 496
-							fontSize = 12, -- 496
-							text = item.kind == "local" and (zh and "本地作品  ·  可 Remix" or "Local  ·  Remixable") or (item.installed and (zh and "发现  ·  已安装" or "Discover  ·  Installed") or (zh and "发现  ·  可安装" or "Discover  ·  Installable")), -- 496
-							textWidth = (wide and 176 or 164) - 24, -- 496
-							alignment = "Left", -- 496
-							color3 = 14475754 -- 496
-						}) -- 496
-					) -- 496
-				end -- 496
-				__TS__SparseArrayPush(____array_35, ____temp_24) -- 496
-				local ____preparing_33 -- 502
-				if preparing then -- 502
-					local ____React_createElement_32 = React.createElement -- 502
-					local ____array_31 = __TS__SparseArrayNew( -- 502
-						"node", -- 502
-						{ -- 502
-							tag = "mobile-feed-download", -- 502
-							x = infoX, -- 502
-							y = actionsY, -- 502
-							width = infoWidth, -- 502
-							height = 48, -- 502
-							anchorX = 0, -- 502
-							anchorY = 0 -- 502
-						}, -- 502
-						React.createElement("label", { -- 502
-							x = 0, -- 502
-							y = 38, -- 502
-							anchorX = 0, -- 502
-							fontName = fontName, -- 502
-							fontSize = 14, -- 502
-							text = zh and "正在下载作品" or "Downloading game", -- 502
-							color3 = 16763955 -- 502
-						}), -- 502
-						React.createElement( -- 502
-							"label", -- 502
-							{ -- 502
-								tag = "mobile-feed-download-percent", -- 502
-								x = infoWidth, -- 502
-								y = 38, -- 502
-								anchorX = 1, -- 502
-								fontName = fontName, -- 502
-								fontSize = 14, -- 502
-								text = tostring(math.floor(prepareProgress * 100)) .. "%", -- 502
-								color3 = 16763955 -- 502
-							} -- 502
-						) -- 502
-					) -- 502
-					local ____React_createElement_30 = React.createElement -- 502
-					local ____temp_28 = { -- 502
-						tag = "mobile-feed-download-track", -- 502
-						width = infoWidth, -- 502
-						height = 8, -- 502
-						y = 8, -- 502
-						anchorX = 0, -- 502
-						anchorY = 0 -- 502
-					} -- 502
-					local ____React_createElement_result_29 = React.createElement(RoundedSurface, {width = infoWidth, height = 8, radius = 4, fillColor = 4280889664}) -- 502
-					local ____React_createElement_27 = React.createElement -- 502
-					local ____temp_26 = { -- 502
-						tag = "mobile-feed-download-fill", -- 502
-						width = infoWidth * prepareProgress, -- 502
-						height = 8, -- 502
-						anchorX = 0, -- 502
-						anchorY = 0 -- 502
-					} -- 502
-					local ____temp_25 -- 508
-					if prepareProgress > 0 then -- 508
-						____temp_25 = React.createElement(RoundedSurface, { -- 508
-							width = infoWidth * prepareProgress, -- 508
-							height = 8, -- 508
-							radius = 4, -- 508
-							topColor = 4294958955, -- 508
-							bottomColor = 4294950190 -- 508
-						}) -- 508
-					else -- 508
-						____temp_25 = nil -- 508
-					end -- 508
-					__TS__SparseArrayPush( -- 508
-						____array_31, -- 508
-						____React_createElement_30( -- 508
-							"node", -- 508
-							____temp_28, -- 508
-							____React_createElement_result_29, -- 508
-							____React_createElement_27("node", ____temp_26, ____temp_25) -- 508
-						) -- 508
-					) -- 508
-					____preparing_33 = ____React_createElement_32(__TS__SparseArraySpread(____array_31)) -- 508
-				else -- 508
-					____preparing_33 = React.createElement( -- 508
-						"node", -- 508
-						nil, -- 508
-						React.createElement( -- 508
-							MobileButton, -- 512
-							{ -- 512
-								tag = "mobile-feed-remix", -- 512
-								x = infoX, -- 512
-								y = actionsY, -- 512
-								width = buttonWidth, -- 512
-								text = zh and "Remix 作品" or "Remix game", -- 512
-								fontSize = math.floor(16 * fontScale), -- 512
-								primary = true, -- 512
-								onTapped = function() return activate("remix") end -- 512
-							} -- 512
-						), -- 512
-						React.createElement( -- 512
-							MobileButton, -- 514
-							{ -- 514
-								tag = "mobile-feed-play", -- 514
-								x = infoX + buttonWidth + 12, -- 514
-								y = actionsY, -- 514
-								width = buttonWidth, -- 514
-								text = zh and "试玩" or "Play", -- 514
-								fontSize = math.floor(17 * fontScale), -- 514
-								onTapped = function() return activate("play") end -- 514
-							} -- 514
-						) -- 514
-					) -- 514
-				end -- 514
-				__TS__SparseArrayPush(____array_35, ____preparing_33) -- 514
-				local ____preparing_34 -- 517
-				if preparing then -- 517
-					____preparing_34 = React.createElement( -- 517
-						"clip-node", -- 517
-						{ -- 517
-							tag = "mobile-feed-download-message-clip", -- 517
-							x = infoX, -- 517
-							y = gestureHintY - 10, -- 517
-							width = infoWidth, -- 517
-							height = 20, -- 517
-							anchorX = 0, -- 517
-							anchorY = 0, -- 517
-							stencil = React.createElement(RoundedStencil, {width = infoWidth, height = 20, radius = 0}) -- 517
-						}, -- 517
-						React.createElement("label", { -- 517
-							tag = "mobile-feed-download-message", -- 517
-							x = 0, -- 517
-							y = 10, -- 517
-							anchorX = 0, -- 517
-							fontName = fontName, -- 517
-							fontSize = 12, -- 517
-							text = (string.gsub(prepareStatus, "[\r\n]+", " ")), -- 517
-							textWidth = -1, -- 517
-							color3 = 11055037 -- 517
-						}) -- 517
-					) -- 517
-				else -- 517
-					____preparing_34 = React.createElement("label", { -- 517
-						tag = "mobile-feed-gesture-hint", -- 517
-						x = infoX, -- 517
-						y = gestureHintY, -- 517
-						anchorX = 0, -- 517
-						anchorY = 0.5, -- 517
-						fontName = fontName, -- 517
-						fontSize = gamepadUsed and 11 or 14, -- 517
-						text = prepareStatus ~= "" and prepareStatus or (item.launchError ~= nil and item.launchError or (gamepadUsed and (zh and "↑↓ 浏览 · A 确认 · X Remix · Start 列表 · Y 新建" or "↑↓ Browse · A Select · X Remix · Start List · Y New") or (zh and "上滑浏览  ·  右滑 Remix  ·  左滑试玩" or "Swipe up  ·  right Remix  ·  left Play"))), -- 517
-						textWidth = infoWidth, -- 517
-						alignment = "Left", -- 517
-						color3 = item.launchError ~= nil and 16739179 or 11055037 -- 517
-					}) -- 517
-				end -- 517
-				__TS__SparseArrayPush(____array_35, ____preparing_34) -- 517
-				____temp_37 = ____React_createElement_36(__TS__SparseArraySpread(____array_35)) -- 517
-			else -- 517
-				____temp_37 = React.createElement( -- 517
-					"node", -- 517
-					nil, -- 517
-					React.createElement("label", { -- 517
-						x = left + usableWidth / 2, -- 517
-						y = bottom + usableHeight / 2 + 20, -- 517
-						fontName = fontName, -- 517
-						fontSize = 22, -- 517
-						text = tab == "discover" and (zh and "暂无移动作品" or "No mobile games yet") or (zh and "没有可运行的本地作品" or "No runnable local games"), -- 517
-						color3 = 16052712 -- 517
-					}), -- 517
-					React.createElement("label", { -- 517
-						x = left + usableWidth / 2, -- 517
-						y = bottom + usableHeight / 2 - 28, -- 517
-						fontName = fontName, -- 517
-						fontSize = 14, -- 517
-						text = tab == "discover" and discoverError ~= "" and discoverError or (zh and "切换标签或稍后重试" or "Switch tabs or retry later"), -- 517
-						textWidth = usableWidth - 48, -- 517
-						color3 = tab == "discover" and discoverError ~= "" and 16739179 or 11055037 -- 517
-					}) -- 517
-				) -- 517
-			end -- 517
-			____createOpen_38 = ____temp_37 -- 469
-		end -- 469
-		local ____temp_39 -- 533
-		if not createOpen and not item and tab == "local" then -- 533
-			____temp_39 = React.createElement( -- 533
-				"node", -- 533
-				nil, -- 533
-				React.createElement(MobileButton, { -- 533
-					tag = "mobile-empty-new", -- 533
-					x = left + 20, -- 533
-					y = bottom + 24, -- 533
-					width = (usableWidth - 52) / 2, -- 533
-					text = zh and "新建作品" or "New game", -- 533
-					onTapped = openCreate -- 533
-				}), -- 533
-				React.createElement( -- 533
-					MobileButton, -- 535
-					{ -- 535
-						tag = "mobile-empty-import", -- 535
-						x = left + 32 + (usableWidth - 52) / 2, -- 535
-						y = bottom + 24, -- 535
-						width = (usableWidth - 52) / 2, -- 535
-						text = zh and "导入作品包" or "Import package", -- 535
-						fontSize = 15, -- 535
-						primary = true, -- 535
-						onTapped = function() return openPackage("add", nil, true) end -- 535
-					} -- 535
-				) -- 535
-			) -- 535
-		else -- 535
-			____temp_39 = nil -- 536
-		end -- 536
-		local ____temp_40 -- 537
-		if not item and tab == "discover" and syncDiscover then -- 537
-			____temp_40 = React.createElement(MobileButton, { -- 537
-				tag = "mobile-feed-empty-index", -- 537
-				x = left + (usableWidth - 160) / 2, -- 537
-				y = bottom + 24, -- 537
-				width = 160, -- 537
-				text = zh and "作品目录" or "Game index", -- 537
-				onTapped = openProjectIndex -- 537
-			}) -- 537
-		else -- 537
-			____temp_40 = nil -- 538
-		end -- 538
-		local ____React_createElement_44 = React.createElement -- 538
-		local ____array_43 = __TS__SparseArrayNew("node", {tag = "mobile-feed-header", order = headerRenderOrder}) -- 538
-		local ____options_onSwitchMode_41 -- 540
-		if options.onSwitchMode then -- 540
-			____options_onSwitchMode_41 = React.createElement( -- 540
-				"node", -- 540
-				{ -- 540
-					tag = "mobile-ui-mode-switch", -- 540
-					x = left + 12, -- 540
-					y = bottom + usableHeight - 58 + landscapeTopLift, -- 540
-					width = 72, -- 540
-					height = 48, -- 540
-					anchorX = 0, -- 540
-					anchorY = 0, -- 540
-					touchEnabled = true, -- 540
-					swallowTouches = true, -- 540
-					onTapped = switchMode -- 540
-				}, -- 540
-				React.createElement("label", { -- 540
-					x = 0, -- 540
-					y = 30, -- 540
-					anchorX = 0, -- 540
-					fontName = fontName, -- 540
-					fontSize = 16, -- 540
-					text = "DORA", -- 540
-					color3 = preparing and 7831180 or 16763955 -- 540
-				}), -- 540
-				React.createElement("label", { -- 540
-					x = 0, -- 540
-					y = 10, -- 540
-					anchorX = 0, -- 540
-					fontName = fontName, -- 540
-					fontSize = 10, -- 540
-					text = zh and "切换传统界面" or "Classic UI", -- 540
-					color3 = 7831180 -- 540
-				}) -- 540
-			) -- 540
-		else -- 540
-			____options_onSwitchMode_41 = nil -- 544
-		end -- 544
-		__TS__SparseArrayPush( -- 544
-			____array_43, -- 544
-			____options_onSwitchMode_41, -- 544
-			React.createElement( -- 544
-				"label", -- 544
-				{ -- 544
-					tag = "mobile-feed-discover-tab", -- 544
-					x = left + usableWidth / 2 - 44, -- 544
-					y = bottom + usableHeight - 34 + landscapeTopLift, -- 544
-					fontName = fontName, -- 544
-					fontSize = math.floor(17 * fontScale), -- 544
-					text = zh and "发现" or "Discover", -- 544
-					color3 = tab == "discover" and 16763955 or 11055037, -- 544
-					touchEnabled = true, -- 544
-					swallowTouches = true, -- 544
-					onTapped = function() return setTab("discover") end -- 544
-				} -- 544
-			), -- 544
-			React.createElement( -- 544
-				"label", -- 544
-				{ -- 544
-					tag = "mobile-feed-local-tab", -- 544
-					x = left + usableWidth / 2 + 44, -- 544
-					y = bottom + usableHeight - 34 + landscapeTopLift, -- 544
-					fontName = fontName, -- 544
-					fontSize = math.floor(17 * fontScale), -- 544
-					text = zh and "本地" or "Local", -- 544
-					color3 = tab == "local" and 16763955 or 11055037, -- 544
-					touchEnabled = true, -- 544
-					swallowTouches = true, -- 544
-					onTapped = function() -- 544
-						____local = getLocalEntries() -- 550
-						setTab("local") -- 550
-					end -- 550
-				} -- 550
-			), -- 550
-			React.createElement(RoundedSurface, { -- 550
-				x = left + usableWidth / 2 + (tab == "discover" and -58 or 30), -- 550
-				y = bottom + usableHeight - 56 + landscapeTopLift, -- 550
-				width = 28, -- 550
-				height = 3, -- 550
-				radius = 1.5, -- 550
-				fillColor = colors.brand, -- 550
-				renderOrder = headerRenderOrder + 1 -- 550
-			}) -- 550
-		) -- 550
-		local ____temp_42 -- 552
-		if tab == "local" and options.createProject then -- 552
-			____temp_42 = React.createElement( -- 552
-				MobileNewButton, -- 552
-				{ -- 552
-					tag = "mobile-feed-create", -- 552
-					x = left + usableWidth - 82, -- 552
-					y = bottom + usableHeight - 56 + landscapeTopLift, -- 552
-					text = zh and "+ 新建" or "+ New", -- 552
-					renderOrder = headerRenderOrder + 1, -- 552
-					onTapped = function() return openPackage("add") end -- 552
-				} -- 552
-			) -- 552
-		else -- 552
-			____temp_42 = nil -- 554
-		end -- 554
-		__TS__SparseArrayPush(____array_43, ____temp_42) -- 554
-		local ____React_createElement_44_result_54 = ____React_createElement_44(__TS__SparseArraySpread(____array_43)) -- 554
-		local ____createOpen_52 -- 556
-		if createOpen then -- 556
-			____createOpen_52 = (function() -- 556
-				local sheetHeight = math.min(createSheetHeight, usableHeight - 64) -- 557
-				local sheetWidth = usableWidth -- 558
-				local contentWidth = sheetWidth - 40 -- 559
-				local actionGap = 12 -- 560
-				local actionsWidth = shortLandscape and math.min( -- 561
-					300, -- 561
-					math.floor(contentWidth * 0.42) -- 561
-				) or contentWidth -- 561
-				local inputWidth = shortLandscape and contentWidth - actionGap - actionsWidth or contentWidth -- 562
-				local actionX = shortLandscape and 20 + inputWidth + actionGap or 20 -- 563
-				local actionY = shortLandscape and sheetHeight - createInputTop - createInputHeight or 20 -- 564
-				local cancelWidth = math.floor((actionsWidth - actionGap) * (shortLandscape and 0.34 or 0.38)) -- 565
-				local ____React_createElement_51 = React.createElement -- 565
-				local ____array_50 = __TS__SparseArrayNew( -- 565
-					"node", -- 565
-					{ -- 565
-						tag = "mobile-project-create-sheet", -- 565
-						order = 10000, -- 565
-						width = width, -- 565
-						height = height, -- 565
-						anchorX = 0, -- 565
-						anchorY = 0, -- 565
-						touchEnabled = true, -- 565
-						swallowTouches = true -- 565
-					}, -- 565
-					React.createElement( -- 565
-						"node", -- 565
-						{ -- 565
-							tag = "mobile-project-create-focus-observer", -- 565
-							order = 1000, -- 565
-							width = width, -- 565
-							height = height, -- 565
-							anchorX = 0, -- 565
-							anchorY = 0, -- 565
-							touchEnabled = true, -- 565
-							swallowTouches = false, -- 565
-							swallowMouseWheel = false, -- 565
-							onTapFilter = function(touch) -- 565
-								touch.enabled = false -- 569
-								if not canEditCreate() then -- 569
-									return -- 570
-								end -- 570
-								local input = createInputRef.current -- 571
-								local point = input and input:convertToNodeSpace(touch.worldLocation) -- 572
-								local inside = input and point and point.x >= 0 and point.y >= 0 and point.x <= input.width and point.y <= input.height -- 573
-								dismissedCreateComposition = not inside and createInput.isComposing() -- 574
-								if not inside then -- 574
-									blurCreateInput() -- 575
-								end -- 575
-							end -- 568
-						} -- 568
-					), -- 568
-					React.createElement( -- 568
-						"draw-node", -- 568
-						{ -- 568
-							tag = "mobile-project-create-backdrop", -- 568
-							order = 0, -- 568
-							renderOrder = 0, -- 568
-							x = width / 2, -- 568
-							y = bottom + sheetHeight + (height - bottom - sheetHeight) / 2 -- 568
-						}, -- 568
-						React.createElement("rect-shape", {width = width, height = height - bottom - sheetHeight, fillColor = 2348810240}) -- 568
-					) -- 568
-				) -- 568
-				local ____React_createElement_49 = React.createElement -- 568
-				local ____array_48 = __TS__SparseArrayNew( -- 568
-					"node", -- 568
-					{ -- 568
-						ref = createPanelRef, -- 568
-						order = 10, -- 568
-						renderOrder = 10, -- 568
-						x = left, -- 568
-						y = bottom, -- 568
-						width = sheetWidth, -- 568
-						height = sheetHeight, -- 568
-						anchorX = 0, -- 568
-						anchorY = 0, -- 568
-						touchEnabled = true, -- 568
-						swallowTouches = true -- 568
-					}, -- 568
-					React.createElement(MobilePanelSurface, {width = sheetWidth, height = sheetHeight, renderOrder = 10}), -- 568
-					React.createElement("label", { -- 568
-						x = 20, -- 568
-						y = sheetHeight - 24, -- 568
-						anchorX = 0, -- 568
-						anchorY = 1, -- 568
-						fontName = fontName, -- 568
-						fontSize = 22, -- 568
-						text = zh and "新建项目" or "New project", -- 568
-						color3 = 16052712 -- 568
-					}), -- 568
-					__TS__ArrayMap( -- 583
-						{"typescript", "lua"}, -- 583
-						function(____, language, i) return React.createElement( -- 583
-							MobileChoiceButton, -- 583
-							{ -- 583
-								tag = "mobile-project-create-language-" .. language, -- 583
-								x = 20 + i * 144, -- 583
-								y = sheetHeight - 98, -- 583
-								width = language == "lua" and 84 or 132, -- 583
-								text = language == "lua" and "Lua" or "TypeScript", -- 583
-								selected = createLanguage == language, -- 583
-								renderOrder = 10, -- 583
-								onTapped = function() -- 583
-									if not canEditCreate() then -- 583
-										return -- 587
-									end -- 587
-									blurCreateInput() -- 588
-									createLanguage = language -- 588
-									render() -- 588
-								end -- 586
-							} -- 586
-						) end -- 586
-					), -- 586
-					React.createElement("label", { -- 586
-						x = 20, -- 586
-						y = sheetHeight - 110, -- 586
-						anchorX = 0, -- 586
-						anchorY = 1, -- 586
-						fontName = fontName, -- 586
-						fontSize = 14, -- 586
-						text = zh and "项目名称" or "Project name", -- 586
-						color3 = 11055037 -- 586
-					}) -- 586
-				) -- 586
-				local ____keptInput_47 -- 591
-				if keptInput then -- 591
-					____keptInput_47 = nil -- 591
-				else -- 591
-					____keptInput_47 = React.createElement("node", { -- 591
-						tag = "mobile-project-create-input", -- 591
-						ref = createInputRef, -- 591
-						renderOrder = 10, -- 591
-						x = 20, -- 591
-						y = sheetHeight - createInputTop - createInputHeight, -- 591
-						width = inputWidth, -- 591
-						height = createInputHeight, -- 591
-						anchorX = 0, -- 591
-						anchorY = 0, -- 591
-						onMount = createInput.mount -- 591
-					}) -- 591
-				end -- 591
-				__TS__SparseArrayPush( -- 591
-					____array_48, -- 591
-					____keptInput_47, -- 591
-					React.createElement("label", { -- 591
-						tag = "mobile-project-create-error", -- 591
-						x = 20, -- 591
-						y = shortLandscape and sheetHeight - createInputTop + 12 or sheetHeight - createInputTop - createInputHeight - 12, -- 591
-						anchorX = 0, -- 591
-						anchorY = 1, -- 591
-						fontName = fontName, -- 591
-						fontSize = 12, -- 591
-						text = createError ~= "" and createError or (zh and ("将创建可运行的 " .. (createLanguage == "lua" and "Lua" or "TypeScript")) .. " 起始项目" or ("Creates a runnable " .. (createLanguage == "lua" and "Lua" or "TypeScript")) .. " starter project"), -- 591
-						textWidth = inputWidth, -- 591
-						alignment = "Left", -- 591
-						color3 = createError ~= "" and 16739179 or 11055037 -- 591
-					}), -- 591
-					React.createElement(MobileButton, { -- 591
-						tag = "mobile-project-create-cancel", -- 591
-						x = actionX, -- 591
-						y = actionY, -- 591
-						width = cancelWidth, -- 591
-						text = zh and "取消" or "Cancel", -- 591
-						renderOrder = 10, -- 591
-						onTapped = closeCreate -- 591
-					}), -- 591
-					React.createElement( -- 591
-						MobileButton, -- 597
-						{ -- 597
-							tag = "mobile-project-create-submit", -- 597
-							x = actionX + cancelWidth + actionGap, -- 597
-							y = actionY, -- 597
-							width = actionsWidth - cancelWidth - actionGap, -- 597
-							text = creating and (zh and "创建中…" or "Creating…") or (zh and "创建并进入 Remix" or "Create and Remix"), -- 597
-							primary = true, -- 597
-							renderOrder = 10, -- 597
-							onTapped = function() -- 597
-								if not dismissedCreateComposition then -- 597
-									submitCreate() -- 598
-								end -- 598
-								dismissedCreateComposition = false -- 598
-							end -- 598
-						} -- 598
-					) -- 598
-				) -- 598
-				__TS__SparseArrayPush( -- 598
-					____array_50, -- 598
-					____React_createElement_49(__TS__SparseArraySpread(____array_48)) -- 598
-				) -- 598
-				return ____React_createElement_51(__TS__SparseArraySpread(____array_50)) -- 566
-			end)() -- 556
-		else -- 556
-			____createOpen_52 = nil -- 601
-		end -- 601
-		__TS__SparseArrayPush( -- 601
-			____array_57, -- 601
-			____React_createElement_55( -- 601
-				"node", -- 601
-				____temp_53, -- 601
-				____createOpen_38, -- 601
-				____temp_39, -- 601
-				____temp_40, -- 601
-				____React_createElement_44_result_54, -- 601
-				____createOpen_52 -- 601
-			) -- 601
-		) -- 601
-		local ____projectIndexOpen_56 -- 603
-		if projectIndexOpen then -- 603
-			____projectIndexOpen_56 = React.createElement( -- 603
-				ProjectIndex, -- 603
-				{ -- 603
-					entries = entries(), -- 603
-					kind = tab, -- 603
-					current = current(), -- 603
-					x = left, -- 603
-					y = bottom, -- 603
-					width = usableWidth, -- 603
-					height = usableHeight, -- 603
-					zh = zh, -- 603
-					refreshing = catalogSyncing, -- 603
-					refreshStatus = catalogStatus, -- 603
-					onRefresh = syncDiscover and (function() return refreshDiscover(true) end) or nil, -- 603
-					onStatusReady = function(____, update) -- 603
-						catalogStatusView = update -- 606
-					end, -- 606
-					onClose = function() -- 606
-						projectIndexOpen = false -- 607
-						render() -- 607
-					end, -- 607
-					onSelect = function(____, entry) -- 607
-						projectIndexOpen = false -- 609
-						local location = resolveFeedLocation(____local, discover, entry) -- 610
-						tab = location.tab -- 611
-						index = location.index -- 611
-						render() -- 612
-					end -- 608
-				} -- 608
-			) -- 608
-		else -- 608
-			____projectIndexOpen_56 = nil -- 613
-		end -- 613
-		__TS__SparseArrayPush(____array_57, ____projectIndexOpen_56) -- 613
-		local scene = ____toNode_59(____React_createElement_58(__TS__SparseArraySpread(____array_57))) -- 422
-		if scene ~= nil then -- 422
-			host:addChild(scene) -- 615
-		end -- 615
-		if keptInput and createPanelRef.current then -- 615
-			keptInput.position = Vec2( -- 617
-				20, -- 617
-				math.min(createSheetHeight, usableHeight - 64) - createInputTop - createInputHeight -- 617
-			) -- 617
-			createPanelRef.current:addChild(keptInput) -- 618
-		end -- 618
-		createInput.refresh() -- 620
-		if restoreFocus and not keptInput and createOpen then -- 620
-			createInput.focus(false) -- 621
-		end -- 621
-	end -- 370
-	attachGamepad( -- 624
-		host, -- 624
-		{ -- 624
-			initialTag = "mobile-feed-play", -- 625
-			isEnabled = function() return isActive() and not packagePanel and not preparing and not transitioning and not creating end, -- 626
-			onActive = function() -- 627
-				gamepadUsed = true -- 627
-				render() -- 627
-			end, -- 627
-			onBack = function() -- 628
-				if createInput.isFocused() then -- 628
-					blurCreateInput() -- 628
-				elseif createOpen then -- 628
-					closeCreate() -- 628
-				else -- 628
-					switchMode() -- 628
-				end -- 628
-			end, -- 628
-			onActivate = function(target) -- 629
-				if target.tag == "mobile-project-create-input" then -- 629
-					target:emit("GamepadActivate") -- 630
-				else -- 630
-					if createInput.isComposing() then -- 630
-						blurCreateInput() -- 632
-						return -- 632
-					end -- 632
-					blurCreateInput() -- 633
-					dismissedCreateComposition = false -- 634
-					target:emit("Tapped") -- 635
-				end -- 635
-			end, -- 629
-			onButton = function(button) -- 638
-				if createOpen then -- 638
-					return false -- 639
-				end -- 639
-				repeat -- 639
-					local ____switch127 = button -- 639
-					local ____cond127 = ____switch127 == "dpup" -- 639
-					if ____cond127 then -- 639
-						commit("previous") -- 641
-						return true -- 641
-					end -- 641
-					____cond127 = ____cond127 or ____switch127 == "dpdown" -- 641
-					if ____cond127 then -- 641
-						commit("next") -- 642
-						return true -- 642
-					end -- 642
-					____cond127 = ____cond127 or ____switch127 == "leftshoulder" -- 642
-					if ____cond127 then -- 642
-						setTab("discover") -- 643
-						return true -- 643
-					end -- 643
-					____cond127 = ____cond127 or ____switch127 == "rightshoulder" -- 643
-					if ____cond127 then -- 643
-						setTab("local") -- 644
-						return true -- 644
-					end -- 644
-					____cond127 = ____cond127 or ____switch127 == "x" -- 644
-					if ____cond127 then -- 644
-						commit("remix") -- 645
-						return true -- 645
-					end -- 645
-					____cond127 = ____cond127 or ____switch127 == "y" -- 645
-					if ____cond127 then -- 645
-						local ____opt_60 = findGamepadNode(host, "mobile-feed-create") -- 645
-						if ____opt_60 ~= nil then -- 645
-							____opt_60:emit("Tapped") -- 646
-						end -- 646
-						return true -- 646
-					end -- 646
-					____cond127 = ____cond127 or ____switch127 == "start" -- 646
-					if ____cond127 then -- 646
-						openProjectIndex() -- 647
-						return true -- 647
-					end -- 647
-					do -- 647
-						return false -- 648
-					end -- 648
-				until true -- 648
-			end -- 638
-		} -- 638
-	) -- 638
-	host:onAppChange(function(setting) -- 652
-		if setting == "Locale" then -- 652
-			local activeEntry = current() -- 654
-			zh = (string.match(App.locale, "^zh")) ~= nil -- 655
-			____local = getLocalEntries() -- 656
-			discover = getDiscoverEntries() -- 657
-			local location = resolveFeedLocation(____local, discover, activeEntry) -- 658
-			tab = location.tab -- 659
-			index = location.index -- 660
-			render() -- 661
-		elseif setting == "Size" then -- 661
-			render() -- 662
-		end -- 662
-	end) -- 652
-	host:onAppEvent(function(event) -- 664
-		if event == "BackButton" then -- 664
-			if projectIndexOpen then -- 664
-				projectIndexOpen = false -- 666
-				render() -- 666
-			elseif createOpen and not creating then -- 666
-				closeCreate() -- 667
-			end -- 667
-		elseif event == "WillEnterBackground" or event == "DidEnterBackground" then -- 667
-			blurCreateInput() -- 668
-		end -- 668
-	end) -- 664
-	host:onCleanup(function() -- 670
-		blurCreateInput() -- 670
-		active = false -- 670
-		if packagePanel ~= nil then -- 670
-			packagePanel:removeFromParent(true) -- 670
-		end -- 670
-		packagePanel = nil -- 670
-	end) -- 670
-	host:slot( -- 671
-		"RestoreFeedEntry", -- 671
-		function(entry) -- 671
-			if not isActive() or HttpServer.wsConnectionCount > 0 then -- 671
-				return -- 672
-			end -- 672
-			returnEntry = entry -- 673
-			____local = getLocalEntries() -- 674
-			discover = getDiscoverEntries() -- 675
-			local location = resolveFeedLocation(____local, discover, entry) -- 676
-			tab = location.tab -- 677
-			index = location.index -- 678
-			render() -- 679
-		end -- 671
-	) -- 671
-	host:slot("SuspendLocalUI", blurCreateInput) -- 681
-	host:slot( -- 682
-		"ResumeLocalUI", -- 682
-		function() -- 682
-			leaving = false -- 682
-			render() -- 682
-		end -- 682
-	) -- 682
-	refreshDiscover = function(force) -- 683
-		if not syncDiscover or catalogSyncing or not isActive() then -- 683
-			return -- 684
-		end -- 684
-		catalogSyncing = true -- 685
-		catalogStatus = zh and "正在同步资源目录…" or "Syncing Catalog…" -- 686
-		if #discover == 0 then -- 686
-			discoverError = catalogStatus -- 688
-		end -- 688
-		render() -- 690
-		syncDiscover( -- 691
-			function(message) -- 691
-				if not isActive() then -- 691
-					return -- 692
-				end -- 692
-				catalogStatus = message -- 693
-				if catalogStatusView ~= nil then -- 693
-					catalogStatusView(message) -- 694
-				end -- 694
-				if projectIndexOpen or #discover > 0 then -- 694
-					return -- 695
-				end -- 695
-				discoverError = message -- 696
-				render() -- 697
-			end, -- 691
-			function(success, message) -- 698
-				if not isActive() then -- 698
-					return -- 699
-				end -- 699
-				catalogSyncing = false -- 700
-				catalogStatus = success and (zh and "目录已更新" or "Catalog updated") or (zh and "刷新失败：" or "Refresh failed: ") .. (message or (zh and "请重试" or "Try again")) -- 701
-				local selected = force and current() or (returnEntry or rememberedEntries[tab] or current()) -- 702
-				local previousCount = #discover -- 703
-				discover = getDiscoverEntries() -- 704
-				discoverError = success and (#discover == 0 and (zh and "目录中暂无可运行作品" or "No runnable Catalog games") or "") or (message or (zh and "资源目录同步失败" or "Catalog sync failed")) -- 705
-				if not force and not projectIndexOpen then -- 705
-					tab = resolveDiscoverRefreshTab( -- 710
-						tab, -- 710
-						userSelectedTab, -- 710
-						previousCount, -- 710
-						#discover, -- 710
-						#____local -- 710
-					) -- 710
-				end -- 710
-				if selected ~= nil then -- 710
-					local location = resolveFeedLocation(____local, discover, selected) -- 712
-					if location.tab == tab then -- 712
-						index = location.index -- 713
-					end -- 713
-				end -- 713
-				index = normalizeFeedIndex( -- 715
-					index, -- 715
-					#entries() -- 715
-				) -- 715
-				render() -- 716
-			end, -- 698
-			force -- 717
-		) -- 717
-	end -- 683
-	render() -- 719
-	refreshDiscover(false) -- 720
-	return host -- 721
-end -- 98
-return ____exports -- 98
+local ____lualib = require("lualib_bundle")
+local __TS__ObjectAssign = ____lualib.__TS__ObjectAssign
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
+local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush
+local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
+local ____exports = {}
+local ____Description = require("Dev/Mobile/Description")
+local Description = ____Description.Description
+local ____LLMSetup = require("Dev/Mobile/LLMSetup")
+local startMobileLLMManager = ____LLMSetup.startMobileLLMManager
+local isMobileLLMOpen = ____LLMSetup.isMobileLLMOpen
+local getMobileLLMSelection = ____LLMSetup.getMobileLLMSelection
+local ____GestureGuide = require("Dev/Mobile/GestureGuide")
+local createGestureGuide = ____GestureGuide.createGestureGuide
+local ____ProjectPresentation = require("Dev/Mobile/ProjectPresentation")
+local projectDisplayName = ____ProjectPresentation.projectDisplayName
+local ____Cartridge = require("Dev/Mobile/Cartridge")
+local Cartridge = ____Cartridge.Cartridge
+local CartridgeSlot = ____Cartridge.CartridgeSlot
+local ____Theme = require("Dev/Mobile/Theme")
+local goTheme = ____Theme.goTheme
+local ____Motion = require("Dev/Mobile/Motion")
+local pressFeedback = ____Motion.pressFeedback
+local ____Dora = require("Dora")
+local Spawn = ____Dora.Spawn
+local Scale = ____Dora.Scale
+local Angle = ____Dora.Angle
+local AngleY = ____Dora.AngleY
+local Opacity = ____Dora.Opacity
+local Sequence = ____Dora.Sequence
+local ____DoraX = require("DoraX")
+local React = ____DoraX.React
+local reference = ____DoraX.reference
+local toNode = ____DoraX.toNode
+local ____Dora = require("Dora")
+local App = ____Dora.App
+local Director = ____Dora.Director
+local Ease = ____Dora.Ease
+local HttpServer = ____Dora.HttpServer
+local Move = ____Dora.Move
+local Node = ____Dora.Node
+local sleep = ____Dora.sleep
+local thread = ____Dora.thread
+local Vec2 = ____Dora.Vec2
+local ____Mascot = require("Dev/Mobile/Mascot")
+local DoraMascot = ____Mascot.DoraMascot
+local ____Gamepad = require("Dev/Mobile/Gamepad")
+local attachGamepad = ____Gamepad.attachGamepad
+local findGamepadNode = ____Gamepad.findGamepadNode
+local ____FeedModel = require("Dev/Mobile/FeedModel")
+local nextFeedIndex = ____FeedModel.nextFeedIndex
+local visibleFeedPages = ____FeedModel.visibleFeedPages
+local normalizeFeedIndex = ____FeedModel.normalizeFeedIndex
+local resolveDiscoverRefreshTab = ____FeedModel.resolveDiscoverRefreshTab
+local resolveFeedGesture = ____FeedModel.resolveFeedGesture
+local resolveFeedLocation = ____FeedModel.resolveFeedLocation
+local ____TextInput = require("Dev/Mobile/TextInput")
+local createTextInput = ____TextInput.createTextInput
+local ____Controls = require("Dev/Mobile/Controls")
+local MobileButton = ____Controls.MobileButton
+local MobileChoiceButton = ____Controls.MobileChoiceButton
+local MobileNewButton = ____Controls.MobileNewButton
+local MobilePanelSurface = ____Controls.MobilePanelSurface
+local ____Visual = require("Dev/Mobile/Visual")
+local GoIcon = ____Visual.GoIcon
+local RoundedStencil = ____Visual.RoundedStencil
+local RoundedSurface = ____Visual.SceneSurface
+local VerticalGradient = ____Visual.VerticalGradient
+local ____PackagePanel = require("Dev/Mobile/PackagePanel")
+local startPackagePanel = ____PackagePanel.startPackagePanel
+local ____ProjectIndex = require("Dev/Mobile/ProjectIndex")
+local ProjectIndex = ____ProjectIndex.ProjectIndex
+local mobileFontScale = goTheme.fontScale
+local colors = goTheme
+local fontName = goTheme.font
+local createSheetHeight = 304
+local createInputHeight = 44
+local createInputTop = 140
+local function conciseDescription(text, limit)
+	local length = (utf8.len(text)) or 0
+	if length <= limit then
+		return text
+	end
+	local stop = utf8.offset(text, limit + 1) or #text + 1
+	return string.sub(text, 1, stop - 1) .. "…"
+end
+function ____exports.startMobileFeed(options)
+	local host, submitCreate, render, refreshDiscover
+	local function getLocalEntries(dirtyProjectPath)
+		return __TS__ArrayMap(
+			options.getLocalEntries(dirtyProjectPath),
+			function(____, entry) return __TS__ObjectAssign(
+				{},
+				entry,
+				{title = projectDisplayName(entry.workDir, entry.title)}
+			) end
+		)
+	end
+	local getDiscoverEntries = options.getDiscoverEntries
+	local onPlay = options.onPlay
+	local onRemix = options.onRemix
+	local prepare = options.prepare
+	local syncDiscover = options.syncDiscover
+	local zh = (string.match(App.locale, "^zh")) ~= nil
+	local tab = "local"
+	local index = 0
+	local drag = Vec2.zero
+	local dragAxis = "none"
+	local discoverError = ""
+	local preparing = false
+	local transitioning = false
+	local prepareStatus = ""
+	local prepareProgress = 0
+	local catalogSyncing = false
+	local catalogStatus = ""
+	local catalogStatusView
+	local repairResourceId = ""
+	local userSelectedTab = false
+	local active = true
+	local leaving = false
+	local packagePanel
+	local settingsOpen = false
+	local createOpen = false
+	local projectIndexOpen = false
+	local creating = false
+	local createName = ""
+	local createLanguage = "typescript"
+	local dismissedCreateComposition = false
+	local createError = ""
+	local gamepadUsed = false
+	local returnEntry = options.initialEntry
+	local ____opt_0 = options.initialEntries
+	local ____temp_4 = ____opt_0 and ____opt_0["local"]
+	local ____opt_2 = options.initialEntries
+	local rememberedEntries = {["local"] = ____temp_4, discover = ____opt_2 and ____opt_2.discover}
+	local cardRef = reference()
+	local launchRef = reference()
+	local slotRef = reference()
+	local lastTouchTime = App.runningTime
+	local guideShown = false
+	local lastTapTime = -1
+	local transitionRevision = 0
+	local guidePlayed = false
+	local function cancelGuide()
+		lastTouchTime = App.runningTime
+		guideShown = false
+		local ____opt_5 = host:getChildByTag("go-gesture-guide")
+		if ____opt_5 ~= nil then
+			____opt_5:removeFromParent(true)
+		end
+	end
+	local indexRef = reference()
+	local infoRef = reference()
+	local headerRef = reference()
+	local menuRef = reference()
+	local swapRef = reference()
+	local gearRef = reference()
+	local dragStartX = 0
+	local dragStartY = 0
+	local dragSampleTime = 0
+	local dragVelocityX = 0
+	local createInputRef = reference()
+	local discover = getDiscoverEntries()
+	local ____local = getLocalEntries()
+	if #discover == 0 then
+		discoverError = zh and "资源目录暂不可用" or "Catalog is unavailable"
+	end
+	local initialLocation = resolveFeedLocation(____local, discover, returnEntry)
+	tab = initialLocation.tab
+	index = initialLocation.index
+	host = Node()
+	host.tag = "mobile-feed"
+	host.scaleX = App.devicePixelRatio
+	host.scaleY = App.devicePixelRatio
+	host:addTo(Director.systemUI)
+	local function isActive()
+		return active and not leaving and host.parent ~= nil
+	end
+	local function closeSettings()
+		if not settingsOpen then
+			return
+		end
+		settingsOpen = false
+		if gearRef.current then
+			gearRef.current:perform(Angle(App.reducedMotion and 0 or 0.24, gearRef.current.angle, 0, Ease.OutCubic))
+		end
+		local menu = menuRef.current
+		if not menu or App.reducedMotion then
+			render()
+			return
+		end
+		menu:perform(Spawn(
+			Opacity(0.16, menu.opacity, 0),
+			Scale(0.16, menu.scaleX, 0.92, Ease.OutCubic),
+			Move(
+				0.16,
+				menu.position,
+				Vec2(menu.x, menu.y + 6),
+				Ease.InQuad
+			)
+		))
+		thread(function()
+			sleep(0.16)
+			if isActive() and menuRef.current == menu then
+				render()
+			end
+		end)
+	end
+	local function entries()
+		return tab == "discover" and discover or ____local
+	end
+	local function current()
+		return entries()[normalizeFeedIndex(
+			index,
+			#entries()
+		) + 1]
+	end
+	local rememberedEntryKey = ""
+	local function rememberCurrent()
+		local item = current()
+		if item == nil or not options.onCurrentEntryChanged then
+			return
+		end
+		local key = (((((item.kind .. "\n") .. item.id) .. "\n") .. (item.workDir or "")) .. "\n") .. (item.fileName or "")
+		if key == rememberedEntryKey then
+			return
+		end
+		rememberedEntryKey = key
+		rememberedEntries[item.kind] = item
+		options.onCurrentEntryChanged(item)
+	end
+	local function canEditCreate()
+		return createOpen and not creating and isActive() and host.visible and HttpServer.wsConnectionCount == 0
+	end
+	local createInput = createTextInput({
+		fontSize = math.floor(16 * mobileFontScale),
+		singleLine = true,
+		background = colors.background,
+		getText = function() return createName end,
+		setText = function(text)
+			createName = text
+		end,
+		getPlaceholder = function() return zh and "例如：星际花园" or "For example: Star Garden" end,
+		isEnabled = canEditCreate,
+		onReturn = function()
+			submitCreate()
+			return true
+		end
+	})
+	local blurCreateInput = createInput.blur
+	local function closeCreate()
+		if creating then
+			return
+		end
+		blurCreateInput()
+		createOpen = false
+		createName = ""
+		createError = ""
+		render()
+	end
+	local function openCreate()
+		if not options.createProject or preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then
+			return
+		end
+		projectIndexOpen = false
+		createOpen = true
+		createLanguage = "typescript"
+		createName = ""
+		dismissedCreateComposition = false
+		createError = ""
+		render()
+		createInput.deferFocus()
+	end
+	local function openProjectIndex()
+		if preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then
+			return
+		end
+		if tab == "local" then
+			____local = getLocalEntries()
+		end
+		projectIndexOpen = true
+		render()
+	end
+	local function createErrorText(____error)
+		repeat
+			local ____switch34 = ____error
+			local ____cond34 = ____switch34 == "invalid-name"
+			if ____cond34 then
+				return zh and "请输入不含路径分隔符的项目名称" or "Enter a project name without path separators"
+			end
+			____cond34 = ____cond34 or ____switch34 == "target-existed"
+			if ____cond34 then
+				return zh and "已有同名项目，请换一个名称" or "A project with that name already exists"
+			end
+			____cond34 = ____cond34 or ____switch34 == "create-folder-failed"
+			if ____cond34 then
+				return zh and "无法创建项目目录，请检查工作目录后重试" or "Could not create the project folder; check the workspace and retry"
+			end
+			____cond34 = ____cond34 or ____switch34 == "create-entry-failed"
+			if ____cond34 then
+				return zh and "无法写入项目入口，未完成项目已回滚" or "Could not write the project entry; the incomplete project was rolled back"
+			end
+			____cond34 = ____cond34 or ____switch34 == "created-project-not-found"
+			if ____cond34 then
+				return zh and "项目已创建，但本地列表未能找到它，请返回后重试" or "The project was created but could not be found in Local; return and retry"
+			end
+			do
+				return zh and "创建失败，请重试" or "Project creation failed; try again"
+			end
+		until true
+	end
+	submitCreate = function()
+		if not options.createProject or creating or not createOpen or not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 then
+			return
+		end
+		if createInput.isComposing() then
+			return
+		end
+		creating = true
+		createError = ""
+		blurCreateInput()
+		render()
+		local result = options.createProject(createName, createLanguage)
+		if not isActive() then
+			return
+		end
+		creating = false
+		if not result.success then
+			createError = createErrorText(result.error)
+			render()
+			return
+		end
+		createOpen = false
+		createName = ""
+		____local = getLocalEntries()
+		returnEntry = result.entry
+		local location = resolveFeedLocation(____local, discover, result.entry)
+		tab = location.tab
+		index = location.index
+		render()
+		onRemix(result.entry)
+	end
+	local function createBlank()
+		if not options.createProject or not isActive() or preparing or transitioning or creating or HttpServer.wsConnectionCount > 0 then
+			return
+		end
+		local draftEntry = {id = "new-project", title = zh and "未命名游戏" or "Untitled game", kind = "local", description = ""}
+		onRemix(
+			draftEntry,
+			function()
+				do
+					local suffix = 0
+					while suffix < 100 do
+						local name = draftEntry.title .. (suffix == 0 and "" or " " .. tostring(suffix + 1))
+						local result = options.createProject(name, "typescript")
+						if result.success or result.error ~= "target-existed" then
+							return result
+						end
+						suffix = suffix + 1
+					end
+				end
+				return {success = false, error = "target-existed"}
+			end
+		)
+	end
+	local function openPackage(mode, path, pickOnOpen)
+		if pickOnOpen == nil then
+			pickOnOpen = false
+		end
+		if not isActive() or not host.visible or packagePanel or preparing or transitioning or creating or createOpen or HttpServer.wsConnectionCount > 0 then
+			return
+		end
+		projectIndexOpen = false
+		packagePanel = startPackagePanel({
+			mode = mode,
+			path = path,
+			pickOnOpen = pickOnOpen,
+			entry = current(),
+			onNew = openCreate,
+			onClosed = function()
+				packagePanel = nil
+			end,
+			onImported = function(entry, play)
+				if not isActive() then
+					return
+				end
+				____local = getLocalEntries(entry.workDir)
+				local imported = __TS__ArrayFind(
+					____local,
+					function(____, item) return item.workDir == entry.workDir end
+				) or entry
+				returnEntry = imported
+				local location = resolveFeedLocation(____local, discover, imported)
+				tab = "local"
+				index = location.index
+				render()
+				if play then
+					onPlay(imported)
+				end
+			end
+		})
+	end
+	local receiveElapsed = 0
+	host:schedule(function(dt)
+		receiveElapsed = receiveElapsed + dt
+		if receiveElapsed < 0.5 then
+			return false
+		end
+		receiveElapsed = 0
+		if isActive() and host.visible and not packagePanel and not createOpen and not projectIndexOpen and not preparing and not transitioning and HttpServer.wsConnectionCount == 0 then
+			if not settingsOpen and #entries() > 0 and not guideShown and not App.reducedMotion and App.runningTime - lastTouchTime > (guidePlayed and 30 or 2.5) then
+				local guide = createGestureGuide(zh)
+				guide.order = 500
+				guide.position = Vec2(0, App.safeArea.height * 0.08)
+				host:addChild(guide)
+				guideShown = true
+				guidePlayed = true
+			end
+			local path = options.takeReceivedFile and options.takeReceivedFile() or App:takeReceivedFile()
+			if path ~= "" then
+				openPackage("receive", path)
+			end
+		end
+		return false
+	end)
+	local function setTab(next)
+		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or transitioning or creating then
+			return
+		end
+		userSelectedTab = true
+		returnEntry = nil
+		if tab == next then
+			return
+		end
+		if createOpen then
+			blurCreateInput()
+			createOpen = false
+			createName = ""
+			createError = ""
+		end
+		local direction = next == "discover" and 1 or -1
+		local ____App_reducedMotion_7
+		if App.reducedMotion then
+			____App_reducedMotion_7 = nil
+		else
+			____App_reducedMotion_7 = cardRef.current
+		end
+		local outgoing = ____App_reducedMotion_7
+		if outgoing ~= nil then
+			outgoing:removeFromParent(false)
+		end
+		tab = next
+		local target = rememberedEntries[next]
+		local ____temp_10
+		if target == nil then
+			____temp_10 = nil
+		else
+			____temp_10 = resolveFeedLocation(____local, discover, target)
+		end
+		local location = ____temp_10
+		index = (location and location.tab) == next and location.index or 0
+		render()
+		if not App.reducedMotion then
+			local incoming = launchRef.current
+			if incoming then
+				incoming:perform(Spawn(
+					Opacity(0.24, 0, 1),
+					Move(
+						0.43,
+						Vec2(incoming.x + direction * 52, incoming.y),
+						incoming.position,
+						Ease.OutBack
+					),
+					Scale(0.43, 0.93, 1, Ease.OutBack),
+					Angle(0.43, direction * 1.5, 0, Ease.OutCubic)
+				))
+			end
+			local ____opt_13 = infoRef.current
+			if ____opt_13 ~= nil then
+				____opt_13:perform(Spawn(
+					Opacity(0.31, 0, 1),
+					Move(
+						0.31,
+						Vec2(0, -16),
+						Vec2.zero,
+						Ease.OutCubic
+					)
+				))
+			end
+			local ____opt_15 = swapRef.current
+			if ____opt_15 ~= nil then
+				____opt_15:perform(Angle(0.43, -180, 0, Ease.OutCubic))
+			end
+			if outgoing then
+				local ghost = Node()
+				ghost.position = Vec2(-App.visualSize.width / 2, -App.visualSize.height / 2)
+				local disable
+				disable = function(node)
+					node.touchEnabled = false
+					node:eachChild(function(child)
+						disable(child)
+						return false
+					end)
+				end
+				disable(outgoing)
+				ghost:addChild(outgoing)
+				host:addChild(ghost)
+				outgoing:perform(Spawn(
+					Opacity(0.19, outgoing.opacity, 0),
+					Move(
+						0.19,
+						outgoing.position,
+						Vec2(-direction * 48, 0),
+						Ease.OutCubic
+					)
+				))
+				thread(function()
+					sleep(0.2)
+					if ghost.parent then
+						ghost:removeFromParent(true)
+					end
+				end)
+			end
+		end
+	end
+	local function activate(action)
+		local item = current()
+		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or item == nil or preparing or transitioning then
+			return
+		end
+		item.launchError = nil
+		local function done()
+			returnEntry = item
+			local ____temp_17
+			if action == "play" then
+				____temp_17 = onPlay(item)
+			else
+				____temp_17 = onRemix(item)
+			end
+			return ____temp_17
+		end
+		if item.kind == "local" or item.installed then
+			done()
+			return
+		end
+		preparing = true
+		prepareProgress = 0
+		prepareStatus = zh and "准备安装…" or "Preparing install…"
+		render()
+		local repairIncomplete = repairResourceId == item.id
+		repairResourceId = ""
+		prepare(
+			item,
+			repairIncomplete,
+			function(progress, message)
+				if not isActive() then
+					return
+				end
+				prepareProgress = math.max(
+					0,
+					math.min(1, progress)
+				)
+				prepareStatus = message
+				render()
+			end,
+			function(success, ready, message, repairable)
+				if not isActive() then
+					return
+				end
+				preparing = false
+				if not success or not ready then
+					repairResourceId = repairable and item.id or ""
+					prepareStatus = message or (zh and "安装失败，点击按钮重试" or "Install failed; tap to retry")
+					render()
+					return
+				end
+				item.fileName = ready.fileName
+				item.workDir = ready.workDir
+				item.installed = true
+				prepareStatus = ""
+				if HttpServer.wsConnectionCount == 0 and host.visible then
+					done()
+				else
+					render()
+				end
+			end
+		)
+	end
+	local function commit(action)
+		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or transitioning then
+			return
+		end
+		if action == "play" or action == "remix" then
+			local card = cardRef.current
+			if card then
+				card.position = Vec2.zero
+			end
+		end
+		repeat
+			local ____switch84 = action
+			local ____cond84 = ____switch84 == "previous" or ____switch84 == "next"
+			if ____cond84 then
+				do
+					returnEntry = nil
+					local target = nextFeedIndex(
+						index + (action == "next" and 1 or -1),
+						#entries(),
+						tab
+					)
+					if target == index and tab == "local" then
+						local card = cardRef.current
+						if card then
+							card:perform(Move(App.reducedMotion and 0 or 0.16, card.position, Vec2.zero, Ease.OutQuad))
+						end
+						return
+					end
+					transitionRevision = transitionRevision + 1
+					local revision = transitionRevision
+					local duration = App.reducedMotion and 0 or 0.32
+					local function finish()
+						if not isActive() or revision ~= transitionRevision or not host.visible then
+							return
+						end
+						index = target
+						transitioning = false
+						App:vibrate(0.012)
+						render()
+					end
+					local card = cardRef.current
+					if duration > 0 and card then
+						transitioning = true
+						card:perform(Move(
+							duration,
+							card.position,
+							Vec2(0, (action == "next" and 1 or -1) * App.safeArea.height),
+							Ease.OutCubic
+						))
+						thread(function()
+							sleep(duration)
+							finish()
+						end)
+					else
+						finish()
+					end
+					return
+				end
+			end
+			____cond84 = ____cond84 or ____switch84 == "play"
+			if ____cond84 then
+				do
+					local cartridge = launchRef.current
+					local slot = slotRef.current
+					if not cartridge or App.reducedMotion then
+						activate("play")
+						return
+					end
+					transitioning = true
+					transitionRevision = transitionRevision + 1
+					local revision = transitionRevision
+					for ____, ref in ipairs({infoRef, headerRef, indexRef}) do
+						local node = ref.current
+						if node then
+							node:perform(Opacity(0.16, node.opacity, 0))
+						end
+					end
+					local slotX = App.safeArea.left - 30
+					local seated = Vec2(slotX + 143.5 + 18, cartridge.y)
+					if slot then
+						slot:perform(Spawn(
+							Opacity(0.24, slot.opacity, 1),
+							Move(
+								0.24,
+								slot.position,
+								Vec2(slotX, cartridge.y - 140),
+								Ease.OutCubic
+							)
+						))
+					end
+					cartridge:stopAllActions()
+					cartridge:perform(Sequence(
+						Spawn(
+							Move(
+								0.4,
+								cartridge.position,
+								Vec2(seated.x + 9, seated.y),
+								Ease.OutCubic
+							),
+							Scale(0.4, cartridge.scaleX, 0.72, Ease.OutCubic),
+							Angle(0.4, cartridge.angle, 8, Ease.OutCubic),
+							AngleY(0.4, cartridge.angleY, 64, Ease.OutCubic)
+						),
+						Spawn(
+							Move(
+								0.16,
+								Vec2(seated.x + 9, seated.y),
+								seated,
+								Ease.OutCubic
+							),
+							Angle(0.16, 8, 0, Ease.OutCubic),
+							AngleY(0.16, 64, 68, Ease.OutCubic)
+						)
+					))
+					thread(function()
+						sleep(0.74)
+						if not isActive() or revision ~= transitionRevision or not host.visible then
+							return
+						end
+						transitioning = false
+						activate("play")
+					end)
+					return
+				end
+			end
+			____cond84 = ____cond84 or ____switch84 == "remix"
+			if ____cond84 then
+				activate("remix")
+				return
+			end
+			do
+				return
+			end
+		until true
+	end
+	local function openAgentConfig()
+		settingsOpen = false
+		render()
+		startMobileLLMManager({
+			coveredNode = host,
+			selectedId = getMobileLLMSelection(),
+			onSelected = function()
+			end,
+			onClose = function()
+				if isActive() then
+					render()
+				end
+			end
+		})
+	end
+	local function switchMode()
+		if not isActive() or not host.visible or HttpServer.wsConnectionCount > 0 or preparing or creating or createOpen or packagePanel or transitioning or not options.onSwitchMode then
+			return
+		end
+		leaving = true
+		options.onSwitchMode()
+	end
+	host:slot("SwitchUIMode", switchMode)
+	render = function()
+		if not isActive() then
+			return
+		end
+		transitionRevision = transitionRevision + 1
+		transitioning = false
+		catalogStatusView = nil
+		cardRef = reference()
+		launchRef = reference()
+		slotRef = reference()
+		infoRef = reference()
+		indexRef = reference()
+		local safeContentWidth = App.safeArea.width - 40
+		local shortLandscapeInputWidth = safeContentWidth - 12 - math.min(
+			300,
+			math.floor(safeContentWidth * 0.42)
+		)
+		local expectedInputWidth = App.safeArea.width >= 760 and App.safeArea.height < 500 and shortLandscapeInputWidth or safeContentWidth
+		local ____createOpen_20 = createOpen
+		if ____createOpen_20 then
+			local ____opt_18 = createInputRef.current
+			____createOpen_20 = (____opt_18 and ____opt_18.width) == expectedInputWidth
+		end
+		local keptInput = ____createOpen_20 and createInputRef.current or nil
+		local restoreFocus = createInput.isFocused()
+		if keptInput ~= nil then
+			keptInput:removeFromParent(false)
+		end
+		if not keptInput then
+			createInput.unmount()
+			createInputRef = reference()
+		end
+		local createPanelRef = reference()
+		host:removeAllChildren()
+		host.scaleX = App.devicePixelRatio
+		host.scaleY = App.devicePixelRatio
+		local ____App_visualSize_23 = App.visualSize
+		local width = ____App_visualSize_23.width
+		local height = ____App_visualSize_23.height
+		local safe = App.safeArea
+		local left = safe.left
+		local bottom = safe.bottom
+		local usableWidth = safe.width
+		local usableHeight = safe.height
+		local wide = usableWidth >= 760
+		local compact = not wide and usableHeight < 700
+		local shortLandscape = wide and usableHeight < 500
+		local data = entries()
+		index = normalizeFeedIndex(index, #data)
+		local item = current()
+		rememberCurrent()
+		local horizontal = usableWidth > usableHeight and usableHeight < 600
+		local infoWidth = horizontal and usableWidth * 0.48 - 32 or math.min(usableWidth - 52, 520)
+		local infoHeight = 112
+		local bottomSpace = horizontal and 28 or math.max(
+			48,
+			math.min(80, usableHeight * 0.09)
+		)
+		local actionsY = bottom + bottomSpace
+		local infoX = horizontal and left + usableWidth * 0.52 or left + (usableWidth - infoWidth) / 2
+		local infoTop = horizontal and bottom + usableHeight / 2 + 38 or actionsY + infoHeight - 24
+		local descriptionY = infoTop - 24
+		local availableHeight = horizontal and usableHeight - 148 or bottom + usableHeight - 66 - (infoTop + 24)
+		local coverScale = math.max(
+			0.4,
+			math.min(1.278, (horizontal and usableWidth * 0.46 - 48 or (usableWidth - 52) * 0.9) / 236, (availableHeight - 48) * 0.9 / 308)
+		)
+		local coverWidth = 236 * coverScale
+		local coverHeight = 308 * coverScale
+		local coverX = horizontal and left + (usableWidth * 0.48 - coverWidth) / 2 or left + (usableWidth - coverWidth) / 2
+		local coverY = horizontal and bottom + (usableHeight - coverHeight) / 2 - 8 or infoTop + 24 + (availableHeight - coverHeight) / 2
+		local restCoverY = coverY + coverHeight / 2
+		local gestureHintY = bottom + 18
+		local fontScale = mobileFontScale
+		local pages = visibleFeedPages(index, #data, tab)
+		local headerRenderOrder = 1000
+		local ____toNode_72 = toNode
+		local ____React_createElement_71 = React.createElement
+		local ____array_70 = __TS__SparseArrayNew(
+			"node",
+			{
+				tag = "mobile-feed-scene",
+				x = -width / 2,
+				y = -height / 2,
+				width = width,
+				height = height,
+				anchorX = 0,
+				anchorY = 0,
+				touchEnabled = true,
+				onTapBegan = function()
+					if isMobileLLMOpen() or preparing or transitioning or settingsOpen or projectIndexOpen or createOpen then
+						return
+					end
+					cancelGuide()
+					drag = Vec2.zero
+					dragAxis = "none"
+					dragSampleTime = App.runningTime
+					dragVelocityX = 0
+					local ____opt_24 = cardRef.current
+					if ____opt_24 ~= nil then
+						____opt_24:stopAllActions()
+					end
+					local ____opt_26 = launchRef.current
+					if ____opt_26 ~= nil then
+						____opt_26:stopAllActions()
+					end
+					local ____opt_28 = slotRef.current
+					if ____opt_28 ~= nil then
+						____opt_28:stopAllActions()
+					end
+					local ____opt_30 = launchRef.current
+					dragStartX = (____opt_30 and ____opt_30.x or coverX + coverWidth / 2) - coverX - coverWidth / 2
+					local ____opt_32 = cardRef.current
+					dragStartY = ____opt_32 and ____opt_32.y or 0
+					if indexRef.current then
+						indexRef.current.opacity = 1
+					end
+				end,
+				onTapMoved = function(touch)
+					if isMobileLLMOpen() or preparing or transitioning or settingsOpen or projectIndexOpen or createOpen then
+						return
+					end
+					drag = drag:add(touch.delta)
+					local elapsed = App.runningTime - dragSampleTime
+					if elapsed > 0 then
+						dragVelocityX = touch.delta.x / (elapsed * 1000)
+					end
+					dragSampleTime = App.runningTime
+					if dragAxis == "none" and math.max(
+						math.abs(drag.x),
+						math.abs(drag.y)
+					) >= 12 then
+						dragAxis = math.abs(drag.x) > math.abs(drag.y) * 1.2 and "horizontal" or "vertical"
+						if dragAxis == "horizontal" and infoRef.current then
+							infoRef.current:perform(Opacity(0.16, infoRef.current.opacity, 0.45))
+						end
+					end
+					if not preparing and not transitioning and cardRef.current then
+						local offset = dragAxis == "vertical" and Vec2(0, drag.y + dragStartY) or Vec2.zero
+						if dragAxis == "horizontal" and slotRef.current then
+							local distance = drag.x + dragStartX / 0.3
+							local progress = math.max(
+								0,
+								math.min(1, -distance / 115)
+							)
+							slotRef.current.opacity = math.min(1, progress * 2)
+							slotRef.current.x = left - 220 + progress * 190
+							if launchRef.current then
+								launchRef.current.x = coverX + coverWidth / 2 + (distance <= 0 and -math.min(-distance * 0.3, 42) or distance * 0.14)
+								launchRef.current.angle = App.reducedMotion and 0 or progress * 2
+								launchRef.current.angleY = App.reducedMotion and 0 or progress * 12
+								local ____launchRef_current_35 = launchRef.current
+								local ____temp_34 = App.reducedMotion and 1 or 1 - progress * 0.075
+								launchRef.current.scaleY = ____temp_34
+								____launchRef_current_35.scaleX = ____temp_34
+								slotRef.current.y = launchRef.current.y - 140
+							end
+						end
+						cardRef.current.position = offset
+					end
+				end,
+				onTapEnded = function()
+					if isMobileLLMOpen() or preparing or transitioning or settingsOpen or projectIndexOpen or createOpen then
+						return
+					end
+					local isTap = math.abs(drag.x) < 12 and math.abs(drag.y) < 12
+					if isTap and App.runningTime - lastTapTime < 0.3 then
+						lastTapTime = -1
+						commit("remix")
+						return
+					end
+					lastTapTime = isTap and App.runningTime or -1
+					local action = resolveFeedGesture(
+						dragAxis == "horizontal" and drag.x or 0,
+						dragAxis == "vertical" and drag.y or 0,
+						usableWidth,
+						usableHeight,
+						false,
+						App.runningTime - dragSampleTime < 0.08 and dragVelocityX or 0
+					)
+					drag = Vec2.zero
+					dragAxis = "none"
+					if indexRef.current then
+						indexRef.current.opacity = 1
+					end
+					if action ~= "play" then
+						local duration = App.reducedMotion and 0 or 0.23
+						local slot = slotRef.current
+						local launch = launchRef.current
+						local info = infoRef.current
+						if slot then
+							slot:perform(Spawn(
+								Opacity(duration, slot.opacity, 0),
+								Move(
+									duration,
+									slot.position,
+									Vec2(left - 220, slot.y),
+									Ease.OutCubic
+								)
+							))
+						end
+						if launch then
+							launch:perform(Spawn(
+								Move(
+									duration,
+									launch.position,
+									Vec2(coverX + coverWidth / 2, restCoverY),
+									Ease.OutCubic
+								),
+								Angle(duration, launch.angle, 0, Ease.OutCubic),
+								Scale(duration, launch.scaleX, 1, Ease.OutCubic),
+								AngleY(duration, launch.angleY, 0, Ease.OutCubic)
+							))
+						end
+						if info then
+							info:perform(Opacity(duration, info.opacity, 1))
+						end
+					end
+					if action == "none" and cardRef.current then
+						local card = cardRef.current
+						card:perform(Move(App.reducedMotion and 0 or 0.16, card.position, Vec2.zero, Ease.OutQuad))
+					end
+					commit(action)
+				end,
+				onMouseWheel = function(delta)
+					cancelGuide()
+					commit(delta.y > 0 and "previous" or "next")
+				end
+			},
+			React.createElement(VerticalGradient, {width = width, height = height, topColor = goTheme.backgroundTop, bottomColor = goTheme.background}),
+			React.createElement(
+				"node",
+				{
+					order = 1,
+					tag = "mobile-feed-slot",
+					ref = slotRef,
+					x = left - 220,
+					y = coverY + (coverHeight - 280) / 2,
+					opacity = 0
+				},
+				React.createElement(CartridgeSlot, {x = 0, y = 0})
+			)
+		)
+		local ____React_createElement_68 = React.createElement
+		local ____array_67 = __TS__SparseArrayNew(
+			"node",
+			{visible = not projectIndexOpen, order = 2},
+			React.createElement(
+				"node",
+				{
+					order = 100,
+					width = width,
+					height = height,
+					anchorX = 0,
+					anchorY = 0,
+					touchEnabled = true,
+					swallowTouches = false,
+					onTapFilter = function(touch)
+						touch.enabled = false
+						cancelGuide()
+					end
+				}
+			)
+		)
+		local ____createOpen_47
+		if createOpen then
+			____createOpen_47 = nil
+		else
+			local ____temp_46
+			if item ~= nil then
+				local ____React_createElement_45 = React.createElement
+				local ____temp_44 = {
+					width = width,
+					height = height,
+					anchorX = 0,
+					anchorY = 0,
+					stencil = React.createElement(RoundedStencil, {width = width, height = bottom + usableHeight - 76, radius = 0})
+				}
+				local ____React_createElement_43 = React.createElement
+				local ____temp_41 = {tag = "mobile-feed-card-" .. item.id, ref = cardRef, key = (tab .. "-") .. item.id}
+				local ____TS__ArrayMap_result_42 = __TS__ArrayMap(
+					pages,
+					function(____, page)
+						local entry = data[page.index + 1]
+						local activePage = page.offset == 0
+						local displayTitle = projectDisplayName(entry.workDir, entry.title)
+						local authorRef = reference()
+						local ____React_createElement_39 = React.createElement
+						local ____temp_37 = {y = -page.offset * usableHeight}
+						local ____React_createElement_result_38 = React.createElement(
+							"node",
+							{
+								tag = activePage and "mobile-feed-cartridge" or nil,
+								ref = activePage and launchRef or nil,
+								x = coverX + coverWidth / 2,
+								y = coverY + coverHeight / 2,
+								width = coverWidth,
+								height = coverHeight,
+								anchorX = 0.5,
+								anchorY = 0.5
+							},
+							React.createElement(Cartridge, {
+								entry = entry,
+								x = 0,
+								y = 0,
+								width = coverWidth,
+								height = coverHeight
+							})
+						)
+						local ____temp_36
+						if tab == "local" then
+							____temp_36 = React.createElement(
+								"node",
+								{
+									tag = activePage and "mobile-feed-index" or nil,
+									ref = activePage and indexRef or nil,
+									x = coverX + coverWidth / 2 - 40,
+									y = horizontal and coverY - 26 or infoTop + 28,
+									width = 80,
+									height = 24,
+									anchorX = 0,
+									anchorY = 0,
+									touchEnabled = activePage,
+									swallowTouches = true,
+									onMount = pressFeedback,
+									onTapped = openProjectIndex
+								},
+								React.createElement(
+									"label",
+									{
+										x = 40,
+										y = 12,
+										fontName = fontName,
+										fontSize = 10,
+										text = ((((page.index + 1 < 10 and "0" or "") .. tostring(page.index + 1)) .. "  /  ") .. (#data < 10 and "0" or "")) .. tostring(#data),
+										color3 = 8093040
+									}
+								)
+							)
+						else
+							____temp_36 = nil
+						end
+						return ____React_createElement_39(
+							"node",
+							____temp_37,
+							____React_createElement_result_38,
+							____temp_36,
+							React.createElement(
+								"node",
+								{ref = activePage and infoRef or nil},
+								React.createElement(
+									"label",
+									{
+										tag = activePage and "mobile-feed-current-title" or nil,
+										x = infoX,
+										y = infoTop,
+										anchorX = 0,
+										fontName = goTheme.headingFont,
+										fontSize = math.floor((compact and 22 or 25) * fontScale),
+										text = conciseDescription(
+											displayTitle,
+											math.floor(infoWidth / 24)
+										),
+										textWidth = -1,
+										color3 = 3159339,
+										alignment = "Left"
+									}
+								),
+								React.createElement(
+									Description,
+									{
+										text = entry.description or "",
+										x = infoX,
+										y = descriptionY,
+										width = infoWidth,
+										active = activePage,
+										onExpand = function(expanded, extraHeight)
+											if not activePage then
+												return
+											end
+											local offset = expanded and extraHeight or 0
+											local duration = App.reducedMotion and 0 or 0.26
+											local info = infoRef.current
+											local author = authorRef.current
+											local count = indexRef.current
+											local cart = launchRef.current
+											if info then
+												info:perform(Move(
+													duration,
+													info.position,
+													Vec2(0, offset),
+													Ease.OutCubic
+												))
+											end
+											if author then
+												author:perform(Move(
+													duration,
+													author.position,
+													Vec2(infoX, (horizontal and infoTop - 110 or actionsY) - offset),
+													Ease.OutCubic
+												))
+											end
+											if not horizontal then
+												restCoverY = coverY + coverHeight / 2 + offset
+												if cart then
+													cart:perform(Move(
+														duration,
+														cart.position,
+														Vec2(cart.x, restCoverY),
+														Ease.OutCubic
+													))
+												end
+												if count then
+													count:perform(Move(
+														duration,
+														count.position,
+														Vec2(count.x, infoTop + 28 + offset),
+														Ease.OutCubic
+													))
+												end
+											end
+										end
+									}
+								),
+								React.createElement(
+									"node",
+									{ref = authorRef, x = infoX, y = horizontal and infoTop - 110 or actionsY},
+									React.createElement(
+										"draw-node",
+										{visible = entry.kind == "local" or entry.author ~= nil, x = 13, y = 16},
+										React.createElement("dot-shape", {radius = 13, color = entry.kind == "local" and 4282558366 or 4292848240})
+									),
+									React.createElement("label", {
+										visible = entry.kind == "local" or entry.author ~= nil,
+										x = 13,
+										y = 16,
+										fontName = fontName,
+										fontSize = 11,
+										text = entry.kind == "local" and (zh and "我" or "Me") or "D",
+										color3 = 16777215
+									}),
+									React.createElement("label", {
+										x = 36,
+										y = 16,
+										anchorX = 0,
+										fontName = fontName,
+										fontSize = 12,
+										text = entry.author or (entry.kind == "local" and (zh and "我" or "Me") or ""),
+										color3 = 3159339,
+										alignment = "Left"
+									}),
+									React.createElement(
+										MobileButton,
+										{
+											tag = activePage and "mobile-feed-remix" or nil,
+											x = infoWidth - 76,
+											y = 0,
+											width = 76,
+											height = 32,
+											fontSize = 12,
+											icon = entry.kind == "local" and "code" or "remix",
+											text = entry.kind == "local" and (zh and "开发" or "Edit") or "Remix",
+											disabled = not activePage or preparing or transitioning,
+											onTapped = function() return activate("remix") end
+										}
+									)
+								)
+							)
+						)
+					end
+				)
+				local ____temp_40
+				if prepareStatus ~= "" or item.launchError or gamepadUsed then
+					____temp_40 = React.createElement("label", {
+						x = infoX,
+						y = gestureHintY,
+						anchorX = 0,
+						fontName = fontName,
+						fontSize = 11,
+						text = item.launchError or (prepareStatus ~= "" and prepareStatus or (zh and "↑↓ 浏览 · A 进入 · X 开发 · Start 列表" or "↑↓ Browse · A Play · X Develop · Start List")),
+						textWidth = infoWidth,
+						alignment = "Left",
+						color3 = 8159855
+					})
+				else
+					____temp_40 = nil
+				end
+				____temp_46 = ____React_createElement_45(
+					"clip-node",
+					____temp_44,
+					____React_createElement_43("node", ____temp_41, ____TS__ArrayMap_result_42, ____temp_40)
+				)
+			else
+				____temp_46 = React.createElement(
+					"node",
+					nil,
+					React.createElement("label", {
+						x = left + usableWidth / 2,
+						y = bottom + usableHeight / 2 + 20,
+						fontName = fontName,
+						fontSize = 22,
+						text = tab == "discover" and (zh and "暂无移动作品" or "No mobile games yet") or (zh and "没有可运行的本地作品" or "No runnable local games"),
+						color3 = 3159339
+					}),
+					React.createElement("label", {
+						x = left + usableWidth / 2,
+						y = bottom + usableHeight / 2 - 28,
+						fontName = fontName,
+						fontSize = 14,
+						text = tab == "discover" and discoverError ~= "" and discoverError or (zh and "切换标签或稍后重试" or "Switch tabs or retry later"),
+						textWidth = usableWidth - 48,
+						color3 = tab == "discover" and discoverError ~= "" and 16739179 or 8159855
+					})
+				)
+			end
+			____createOpen_47 = ____temp_46
+		end
+		__TS__SparseArrayPush(____array_67, ____createOpen_47)
+		local ____temp_48
+		if not createOpen and item == nil and tab == "local" then
+			____temp_48 = React.createElement(
+				"node",
+				nil,
+				React.createElement(MobileButton, {
+					tag = "mobile-empty-new",
+					x = left + 20,
+					y = bottom + 24,
+					width = (usableWidth - 52) / 2,
+					text = zh and "新建作品" or "New game",
+					onTapped = createBlank
+				}),
+				React.createElement(
+					MobileButton,
+					{
+						tag = "mobile-empty-import",
+						x = left + 32 + (usableWidth - 52) / 2,
+						y = bottom + 24,
+						width = (usableWidth - 52) / 2,
+						text = zh and "导入作品包" or "Import package",
+						fontSize = 15,
+						primary = true,
+						onTapped = function() return openPackage("add", nil, true) end
+					}
+				)
+			)
+		else
+			____temp_48 = nil
+		end
+		__TS__SparseArrayPush(____array_67, ____temp_48)
+		local ____temp_49
+		if item == nil and tab == "discover" and syncDiscover then
+			____temp_49 = React.createElement(MobileButton, {
+				tag = "mobile-feed-empty-index",
+				x = left + (usableWidth - 160) / 2,
+				y = bottom + 24,
+				width = 160,
+				text = zh and "作品目录" or "Game index",
+				onTapped = openProjectIndex
+			})
+		else
+			____temp_49 = nil
+		end
+		__TS__SparseArrayPush(____array_67, ____temp_49)
+		local ____React_createElement_54 = React.createElement
+		local ____array_53 = __TS__SparseArrayNew(
+			"node",
+			{tag = "mobile-feed-header", ref = headerRef, order = headerRenderOrder},
+			React.createElement(RoundedSurface, {
+				x = 0,
+				y = bottom + usableHeight - 76,
+				width = width,
+				height = height - bottom - usableHeight + 76,
+				radius = 0,
+				fillColor = goTheme.backgroundTop
+			})
+		)
+		local ____settingsOpen_50
+		if settingsOpen then
+			____settingsOpen_50 = React.createElement("node", {
+				width = width,
+				height = height,
+				anchorX = 0,
+				anchorY = 0,
+				touchEnabled = true,
+				swallowTouches = true,
+				onTapped = closeSettings
+			})
+		else
+			____settingsOpen_50 = nil
+		end
+		__TS__SparseArrayPush(
+			____array_53,
+			____settingsOpen_50,
+			React.createElement(
+				"node",
+				{
+					tag = "mobile-feed-scene-toggle",
+					x = left + 20,
+					y = bottom + usableHeight - 58,
+					width = 140,
+					height = 40,
+					anchorX = 0,
+					anchorY = 0,
+					touchEnabled = not preparing and not transitioning,
+					swallowTouches = true,
+					onMount = pressFeedback,
+					onTapped = function()
+						____local = getLocalEntries()
+						setTab(tab == "local" and "discover" or "local")
+					end
+				},
+				React.createElement(
+					"node",
+					{ref = swapRef, x = 8, y = 20},
+					React.createElement(GoIcon, {
+						name = "swap",
+						x = -8,
+						y = -8,
+						size = 16,
+						color = 4290155559
+					})
+				),
+				React.createElement("label", {
+					x = 27,
+					y = 20,
+					anchorX = 0,
+					fontName = goTheme.headingFont,
+					fontSize = 17,
+					text = tab == "local" and (zh and "本地" or "Local") or (zh and "发现" or "Discover"),
+					color3 = 3159339,
+					alignment = "Left"
+				}),
+				React.createElement("label", {
+					x = zh and 76 or 104,
+					y = 20,
+					anchorX = 0,
+					fontName = fontName,
+					fontSize = 11,
+					text = tab == "local" and (zh and "发现" or "Discover") or (zh and "本地" or "Local"),
+					color3 = 9147006,
+					alignment = "Left"
+				})
+			)
+		)
+		local ____options_createProject_51
+		if options.createProject then
+			____options_createProject_51 = React.createElement(MobileNewButton, {
+				tag = "mobile-feed-create",
+				x = left + usableWidth - 140,
+				y = bottom + usableHeight - 54,
+				text = zh and "制造" or "Create",
+				onTapped = createBlank
+			})
+		else
+			____options_createProject_51 = nil
+		end
+		__TS__SparseArrayPush(
+			____array_53,
+			____options_createProject_51,
+			React.createElement(
+				"node",
+				{
+					onMount = pressFeedback,
+					tag = "mobile-feed-settings",
+					x = left + usableWidth - 52,
+					y = bottom + usableHeight - 56,
+					width = 36,
+					height = 36,
+					anchorX = 0,
+					anchorY = 0,
+					touchEnabled = not preparing and not transitioning,
+					swallowTouches = true,
+					onTapped = function()
+						cancelGuide()
+						if settingsOpen then
+							closeSettings()
+						else
+							settingsOpen = true
+							render()
+						end
+					end
+				},
+				React.createElement(
+					"node",
+					{
+						ref = gearRef,
+						x = 18,
+						y = 18,
+						onMount = function(node)
+							if settingsOpen and not App.reducedMotion then
+								node:perform(Angle(0.36, 0, 65, Ease.OutCubic))
+							end
+						end
+					},
+					React.createElement(GoIcon, {name = "settings", x = -10, y = -10, size = 20})
+				)
+			)
+		)
+		local ____settingsOpen_52
+		if settingsOpen then
+			____settingsOpen_52 = React.createElement(
+				"node",
+				{
+					ref = menuRef,
+					tag = "mobile-feed-settings-menu",
+					x = left + usableWidth - 20,
+					y = bottom + usableHeight - 64,
+					width = 174,
+					height = 102,
+					anchorX = 1,
+					anchorY = 1,
+					onMount = function(node) return node:perform(Spawn(
+						Opacity(App.reducedMotion and 0 or 0.2, 0, 1),
+						Scale(App.reducedMotion and 0 or 0.29, App.reducedMotion and 1 or 0.86, 1, Ease.OutBack)
+					)) end
+				},
+				React.createElement(RoundedSurface, {
+					width = 174,
+					height = 102,
+					radius = 12,
+					fillColor = 4294769912,
+					borderWidth = 0.7,
+					borderColor = 4292006855,
+					shadow = true
+				}),
+				React.createElement(
+					"node",
+					{
+						tag = "mobile-agent-config",
+						x = 6,
+						y = 54,
+						width = 162,
+						height = 42,
+						anchorX = 0,
+						anchorY = 0,
+						touchEnabled = true,
+						swallowTouches = true,
+						onMount = pressFeedback,
+						onTapped = openAgentConfig
+					},
+					React.createElement(GoIcon, {name = "settings", x = 10, y = 12, size = 18}),
+					React.createElement("label", {
+						x = 38,
+						y = 21,
+						anchorX = 0,
+						fontName = fontName,
+						fontSize = 13,
+						text = zh and "Agent 配置" or "Agent settings",
+						color3 = 3159339,
+						alignment = "Left"
+					})
+				),
+				React.createElement(
+					"node",
+					{
+						tag = "mobile-ui-mode-switch",
+						x = 6,
+						y = 6,
+						width = 162,
+						height = 42,
+						anchorX = 0,
+						anchorY = 0,
+						touchEnabled = true,
+						swallowTouches = true,
+						onMount = pressFeedback,
+						onTapped = switchMode
+					},
+					React.createElement(GoIcon, {
+						name = "exit",
+						x = 10,
+						y = 12,
+						size = 18,
+						color = 4285823848
+					}),
+					React.createElement("label", {
+						x = 38,
+						y = 21,
+						anchorX = 0,
+						fontName = fontName,
+						fontSize = 13,
+						text = zh and "退出 Go 模式" or "Exit Go mode",
+						color3 = 3159339,
+						alignment = "Left"
+					})
+				)
+			)
+		else
+			____settingsOpen_52 = nil
+		end
+		__TS__SparseArrayPush(____array_53, ____settingsOpen_52)
+		__TS__SparseArrayPush(
+			____array_67,
+			____React_createElement_54(__TS__SparseArraySpread(____array_53))
+		)
+		local ____preparing_58
+		if preparing then
+			local ____React_createElement_57 = React.createElement
+			local ____array_56 = __TS__SparseArrayNew(
+				"node",
+				{
+					tag = "mobile-feed-loading",
+					order = 2000,
+					width = width,
+					height = height,
+					anchorX = 0,
+					anchorY = 0,
+					touchEnabled = true,
+					swallowTouches = true
+				},
+				React.createElement(RoundedSurface, {width = width, height = height, radius = 0, fillColor = goTheme.background}),
+				React.createElement(DoraMascot, {x = width / 2, y = height / 2 + 64, size = 58, state = "idle"}),
+				React.createElement("label", {
+					x = width / 2,
+					y = height / 2 + 12,
+					fontName = fontName,
+					fontSize = 16,
+					text = zh and "正在准备游戏" or "Preparing game",
+					color3 = 3159339
+				}),
+				React.createElement(RoundedSurface, {
+					x = width / 2 - 100,
+					y = height / 2 - 24,
+					width = 200,
+					height = 5,
+					radius = 2.5,
+					fillColor = goTheme.border
+				})
+			)
+			local ____temp_55
+			if prepareProgress > 0 then
+				____temp_55 = React.createElement(RoundedSurface, {
+					x = width / 2 - 100,
+					y = height / 2 - 24,
+					width = 200 * prepareProgress,
+					height = 5,
+					radius = 2.5,
+					fillColor = goTheme.brand
+				})
+			else
+				____temp_55 = nil
+			end
+			__TS__SparseArrayPush(
+				____array_56,
+				____temp_55,
+				React.createElement(
+					"label",
+					{
+						x = width / 2,
+						y = height / 2 - 55,
+						fontName = fontName,
+						fontSize = 12,
+						text = (tostring(math.floor(prepareProgress * 100)) .. "% · ") .. prepareStatus,
+						textWidth = usableWidth - 64,
+						color3 = 8159855
+					}
+				)
+			)
+			____preparing_58 = ____React_createElement_57(__TS__SparseArraySpread(____array_56))
+		else
+			____preparing_58 = nil
+		end
+		__TS__SparseArrayPush(____array_67, ____preparing_58)
+		local ____createOpen_66
+		if createOpen then
+			____createOpen_66 = (function()
+				local sheetHeight = math.min(createSheetHeight, usableHeight - 64)
+				local sheetWidth = usableWidth
+				local contentWidth = sheetWidth - 40
+				local actionGap = 12
+				local actionsWidth = shortLandscape and math.min(
+					300,
+					math.floor(contentWidth * 0.42)
+				) or contentWidth
+				local inputWidth = shortLandscape and contentWidth - actionGap - actionsWidth or contentWidth
+				local actionX = shortLandscape and 20 + inputWidth + actionGap or 20
+				local actionY = shortLandscape and sheetHeight - createInputTop - createInputHeight or 20
+				local cancelWidth = math.floor((actionsWidth - actionGap) * (shortLandscape and 0.34 or 0.38))
+				local ____React_createElement_65 = React.createElement
+				local ____array_64 = __TS__SparseArrayNew(
+					"node",
+					{
+						tag = "mobile-project-create-sheet",
+						order = 10000,
+						width = width,
+						height = height,
+						anchorX = 0,
+						anchorY = 0,
+						touchEnabled = true,
+						swallowTouches = true
+					},
+					React.createElement(
+						"node",
+						{
+							tag = "mobile-project-create-focus-observer",
+							order = 1000,
+							width = width,
+							height = height,
+							anchorX = 0,
+							anchorY = 0,
+							touchEnabled = true,
+							swallowTouches = false,
+							swallowMouseWheel = false,
+							onTapFilter = function(touch)
+								touch.enabled = false
+								if not canEditCreate() then
+									return
+								end
+								local input = createInputRef.current
+								local point = input and input:convertToNodeSpace(touch.worldLocation)
+								local inside = input and point and point.x >= 0 and point.y >= 0 and point.x <= input.width and point.y <= input.height
+								dismissedCreateComposition = not inside and createInput.isComposing()
+								if not inside then
+									blurCreateInput()
+								end
+							end
+						}
+					),
+					React.createElement(
+						"draw-node",
+						{
+							tag = "mobile-project-create-backdrop",
+							order = 0,
+							renderOrder = 0,
+							x = width / 2,
+							y = bottom + sheetHeight + (height - bottom - sheetHeight) / 2
+						},
+						React.createElement("rect-shape", {width = width, height = height - bottom - sheetHeight, fillColor = 2348810240})
+					)
+				)
+				local ____React_createElement_63 = React.createElement
+				local ____array_62 = __TS__SparseArrayNew(
+					"node",
+					{
+						ref = createPanelRef,
+						order = 10,
+						renderOrder = 10,
+						x = left,
+						y = bottom,
+						width = sheetWidth,
+						height = sheetHeight,
+						anchorX = 0,
+						anchorY = 0,
+						touchEnabled = true,
+						swallowTouches = true
+					},
+					React.createElement(MobilePanelSurface, {width = sheetWidth, height = sheetHeight, renderOrder = 10}),
+					React.createElement("label", {
+						x = 20,
+						y = sheetHeight - 24,
+						anchorX = 0,
+						anchorY = 1,
+						fontName = fontName,
+						fontSize = 22,
+						text = zh and "新建项目" or "New project",
+						color3 = 3159339,
+						alignment = "Left"
+					}),
+					__TS__ArrayMap(
+						{"typescript", "lua"},
+						function(____, language, i) return React.createElement(
+							MobileChoiceButton,
+							{
+								tag = "mobile-project-create-language-" .. language,
+								x = 20 + i * 144,
+								y = sheetHeight - 98,
+								width = language == "lua" and 84 or 132,
+								text = language == "lua" and "Lua" or "TypeScript",
+								selected = createLanguage == language,
+								renderOrder = 10,
+								onTapped = function()
+									if not canEditCreate() then
+										return
+									end
+									blurCreateInput()
+									createLanguage = language
+									render()
+								end
+							}
+						) end
+					),
+					React.createElement("label", {
+						x = 20,
+						y = sheetHeight - 110,
+						anchorX = 0,
+						anchorY = 1,
+						fontName = fontName,
+						fontSize = 14,
+						text = zh and "项目名称" or "Project name",
+						color3 = 8159855,
+						alignment = "Left"
+					})
+				)
+				local ____keptInput_61
+				if keptInput then
+					____keptInput_61 = nil
+				else
+					____keptInput_61 = React.createElement("node", {
+						tag = "mobile-project-create-input",
+						ref = createInputRef,
+						renderOrder = 10,
+						x = 20,
+						y = sheetHeight - createInputTop - createInputHeight,
+						width = inputWidth,
+						height = createInputHeight,
+						anchorX = 0,
+						anchorY = 0,
+						onMount = createInput.mount
+					})
+				end
+				__TS__SparseArrayPush(
+					____array_62,
+					____keptInput_61,
+					React.createElement("label", {
+						tag = "mobile-project-create-error",
+						x = 20,
+						y = shortLandscape and sheetHeight - createInputTop + 12 or sheetHeight - createInputTop - createInputHeight - 12,
+						anchorX = 0,
+						anchorY = 1,
+						fontName = fontName,
+						fontSize = 12,
+						text = createError ~= "" and createError or (zh and ("将创建可运行的 " .. (createLanguage == "lua" and "Lua" or "TypeScript")) .. " 起始项目" or ("Creates a runnable " .. (createLanguage == "lua" and "Lua" or "TypeScript")) .. " starter project"),
+						textWidth = inputWidth,
+						alignment = "Left",
+						color3 = createError ~= "" and 16739179 or 8159855
+					}),
+					React.createElement(MobileButton, {
+						tag = "mobile-project-create-cancel",
+						x = actionX,
+						y = actionY,
+						width = cancelWidth,
+						text = zh and "取消" or "Cancel",
+						renderOrder = 10,
+						onTapped = closeCreate
+					}),
+					React.createElement(
+						MobileButton,
+						{
+							tag = "mobile-project-create-submit",
+							x = actionX + cancelWidth + actionGap,
+							y = actionY,
+							width = actionsWidth - cancelWidth - actionGap,
+							text = creating and (zh and "创建中…" or "Creating…") or (zh and "创建并进入 Remix" or "Create and Remix"),
+							primary = true,
+							renderOrder = 10,
+							onTapped = function()
+								if not dismissedCreateComposition then
+									submitCreate()
+								end
+								dismissedCreateComposition = false
+							end
+						}
+					)
+				)
+				__TS__SparseArrayPush(
+					____array_64,
+					____React_createElement_63(__TS__SparseArraySpread(____array_62))
+				)
+				return ____React_createElement_65(__TS__SparseArraySpread(____array_64))
+			end)()
+		else
+			____createOpen_66 = nil
+		end
+		__TS__SparseArrayPush(____array_67, ____createOpen_66)
+		__TS__SparseArrayPush(
+			____array_70,
+			____React_createElement_68(__TS__SparseArraySpread(____array_67))
+		)
+		local ____projectIndexOpen_69
+		if projectIndexOpen then
+			____projectIndexOpen_69 = React.createElement(
+				ProjectIndex,
+				{
+					entries = entries(),
+					kind = tab,
+					current = current(),
+					x = left,
+					y = bottom,
+					width = usableWidth,
+					height = usableHeight,
+					zh = zh,
+					refreshing = catalogSyncing,
+					refreshStatus = catalogStatus,
+					onRefresh = syncDiscover and (function() return refreshDiscover(true) end) or nil,
+					onStatusReady = function(____, update)
+						catalogStatusView = update
+					end,
+					onClose = function()
+						projectIndexOpen = false
+						render()
+					end,
+					onSelect = function(____, entry)
+						projectIndexOpen = false
+						local location = resolveFeedLocation(____local, discover, entry)
+						tab = location.tab
+						index = location.index
+						render()
+					end
+				}
+			)
+		else
+			____projectIndexOpen_69 = nil
+		end
+		__TS__SparseArrayPush(____array_70, ____projectIndexOpen_69)
+		local scene = ____toNode_72(____React_createElement_71(__TS__SparseArraySpread(____array_70)))
+		if scene ~= nil then
+			host:addChild(scene)
+		end
+		if keptInput and createPanelRef.current then
+			keptInput.position = Vec2(
+				20,
+				math.min(createSheetHeight, usableHeight - 64) - createInputTop - createInputHeight
+			)
+			createPanelRef.current:addChild(keptInput)
+		end
+		createInput.refresh()
+		if restoreFocus and not keptInput and createOpen then
+			createInput.focus(false)
+		end
+	end
+	attachGamepad(
+		host,
+		{
+			initialTag = "mobile-feed-remix",
+			isEnabled = function() return isActive() and not packagePanel and not preparing and not transitioning and not creating end,
+			onActive = function()
+				gamepadUsed = true
+				render()
+			end,
+			onBack = function()
+				if createInput.isFocused() then
+					blurCreateInput()
+				elseif createOpen then
+					closeCreate()
+				elseif settingsOpen then
+					settingsOpen = false
+					render()
+				else
+					switchMode()
+				end
+			end,
+			onActivate = function(target)
+				if target.tag == "mobile-project-create-input" then
+					target:emit("GamepadActivate")
+				else
+					if createInput.isComposing() then
+						blurCreateInput()
+						return
+					end
+					blurCreateInput()
+					dismissedCreateComposition = false
+					target:emit("Tapped")
+				end
+			end,
+			onButton = function(button)
+				if createOpen or projectIndexOpen or settingsOpen then
+					return false
+				end
+				repeat
+					local ____switch178 = button
+					local ____cond178 = ____switch178 == "dpup"
+					if ____cond178 then
+						commit("previous")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "dpdown"
+					if ____cond178 then
+						commit("next")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "leftshoulder"
+					if ____cond178 then
+						setTab("discover")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "rightshoulder"
+					if ____cond178 then
+						setTab("local")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "a"
+					if ____cond178 then
+						commit("play")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "x"
+					if ____cond178 then
+						commit("remix")
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "y"
+					if ____cond178 then
+						local ____opt_73 = findGamepadNode(host, "mobile-feed-create")
+						if ____opt_73 ~= nil then
+							____opt_73:emit("Tapped")
+						end
+						return true
+					end
+					____cond178 = ____cond178 or ____switch178 == "start"
+					if ____cond178 then
+						openProjectIndex()
+						return true
+					end
+					do
+						return false
+					end
+				until true
+			end
+		}
+	)
+	host:onAppChange(function(setting)
+		if setting == "Locale" then
+			local activeEntry = current()
+			zh = (string.match(App.locale, "^zh")) ~= nil
+			____local = getLocalEntries()
+			discover = getDiscoverEntries()
+			local location = resolveFeedLocation(____local, discover, activeEntry)
+			tab = location.tab
+			index = location.index
+			render()
+		elseif setting == "Size" then
+			render()
+		end
+	end)
+	host:onAppEvent(function(event)
+		if event == "BackButton" then
+			if settingsOpen then
+				settingsOpen = false
+				render()
+			elseif projectIndexOpen then
+				projectIndexOpen = false
+				render()
+			elseif createOpen and not creating then
+				closeCreate()
+			end
+		elseif event == "WillEnterBackground" or event == "DidEnterBackground" then
+			blurCreateInput()
+		end
+	end)
+	host:onCleanup(function()
+		blurCreateInput()
+		active = false
+		if packagePanel ~= nil then
+			packagePanel:removeFromParent(true)
+		end
+		packagePanel = nil
+	end)
+	host:slot(
+		"RestoreFeedEntry",
+		function(entry)
+			if not isActive() or HttpServer.wsConnectionCount > 0 then
+				return
+			end
+			returnEntry = entry
+			____local = getLocalEntries()
+			discover = getDiscoverEntries()
+			local location = resolveFeedLocation(____local, discover, entry)
+			tab = location.tab
+			index = location.index
+			render()
+		end
+	)
+	host:slot(
+		"SuspendLocalUI",
+		function()
+			if packagePanel then
+				packagePanel.visible = false
+			end
+			blurCreateInput()
+			cancelGuide()
+			transitionRevision = transitionRevision + 1
+			transitioning = false
+		end
+	)
+	host:slot(
+		"ResumeLocalUI",
+		function()
+			if packagePanel then
+				packagePanel.visible = host.visible
+			end
+			leaving = false
+			render()
+		end
+	)
+	refreshDiscover = function(force)
+		if not syncDiscover or catalogSyncing or not isActive() then
+			return
+		end
+		catalogSyncing = true
+		catalogStatus = zh and "正在同步资源目录…" or "Syncing Catalog…"
+		if #discover == 0 then
+			discoverError = catalogStatus
+		end
+		render()
+		syncDiscover(
+			function(message)
+				if not isActive() then
+					return
+				end
+				catalogStatus = message
+				if catalogStatusView ~= nil then
+					catalogStatusView(message)
+				end
+				if projectIndexOpen or #discover > 0 then
+					return
+				end
+				discoverError = message
+				render()
+			end,
+			function(success, message)
+				if not isActive() then
+					return
+				end
+				catalogSyncing = false
+				catalogStatus = success and (zh and "目录已更新" or "Catalog updated") or (zh and "刷新失败：" or "Refresh failed: ") .. (message or (zh and "请重试" or "Try again"))
+				local selected = force and current() or (returnEntry or rememberedEntries[tab] or current())
+				local previousCount = #discover
+				discover = getDiscoverEntries()
+				discoverError = success and (#discover == 0 and (zh and "目录中暂无可运行作品" or "No runnable Catalog games") or "") or (message or (zh and "资源目录同步失败" or "Catalog sync failed"))
+				if not force and not projectIndexOpen then
+					tab = resolveDiscoverRefreshTab(
+						tab,
+						userSelectedTab,
+						previousCount,
+						#discover,
+						#____local
+					)
+				end
+				if selected ~= nil then
+					local location = resolveFeedLocation(____local, discover, selected)
+					if location.tab == tab then
+						index = location.index
+					end
+				end
+				index = normalizeFeedIndex(
+					index,
+					#entries()
+				)
+				render()
+			end,
+			force
+		)
+	end
+	render()
+	refreshDiscover(false)
+	return host
+end
+return ____exports

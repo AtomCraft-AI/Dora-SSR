@@ -1,0 +1,6 @@
+{
+  "name": "dora-go-design-assets",
+  "private": true,
+  "scripts": {"icons": "node export-go-icons.cjs"},
+  "devDependencies": {"@resvg/resvg-js": "2.6.2", "lucide-static": "1.46.0"}
+}

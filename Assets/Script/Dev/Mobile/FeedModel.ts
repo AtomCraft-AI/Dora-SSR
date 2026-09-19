@@ -9,6 +9,7 @@ export interface FeedEntry {
 	fileName?: string;
 	workDir?: string;
 	bannerFile?: string;
+	author?: string;
 	installed?: boolean;
 }
 
@@ -55,6 +56,23 @@ export const normalizeFeedIndex = (index: number, count: number) => {
 	return math.max(0, math.min(math.floor(index), count - 1));
 };
 
+
+/** Discovery is a circular feed; the local library retains bounded navigation. */
+export const nextFeedIndex = (index: number, count: number, tab: FeedTab) => {
+ if (count <= 0) return 0;
+ return tab === "discover" ? ((math.floor(index) % count) + count) % count : normalizeFeedIndex(index, count);
+};
+
+export const visibleFeedPages = (index: number, count: number, tab: FeedTab) => {
+ const pages: { index: number; offset: number }[] = [];
+ if (count <= 0) return pages;
+ for (const offset of [-1,0,1]) {
+  const target=index+offset;
+  if (tab === "discover" || (target >= 0 && target < count)) pages.push({index:nextFeedIndex(target,count,tab),offset});
+ }
+ return pages;
+};
+
 export function resolveFeedLocation(local: FeedEntry[], discover: FeedEntry[], target?: FeedEntry): { tab: FeedTab; index: number } {
 	if (target) {
 		const preferred = target.kind === "discover" ? discover : local;
@@ -90,14 +108,16 @@ export const resolveFeedGesture = (
 	width: number,
 	height: number,
 	controlCaptured = false,
+	velocityX = 0,
 ): FeedAction => {
 	if (controlCaptured) return "none";
 	const absX = math.abs(dx);
 	const absY = math.abs(dy);
 	if (absX < 18 && absY < 18) return "none";
 	if (absX > absY * 1.2) {
-		if (absX < math.max(64, width * 0.18)) return "none";
-		return dx > 0 ? "remix" : "play";
+		if (dx < -40 && velocityX < -0.55) return "play";
+		if (absX < math.min(96, math.max(64, width * 0.24))) return "none";
+		return dx > 0 ? "none" : "play";
 	}
 	if (absY < math.max(72, height * 0.14)) return "none";
 	return dy > 0 ? "next" : "previous";

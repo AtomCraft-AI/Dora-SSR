@@ -1,0 +1,29 @@
+{
+  "source": "https://lucide.dev",
+  "version": "1.46.0",
+  "size": 72,
+  "strokeWidth": 1.7,
+  "icons": {
+    "settings": "settings",
+    "back": "chevron-left",
+    "more": "ellipsis",
+    "down": "arrow-down",
+    "exit": "log-out",
+    "plus": "plus",
+    "code": "code-xml",
+    "remix": "git-fork",
+    "files": "folder",
+    "changes": "git-compare-arrows",
+    "logs": "terminal",
+    "swap": "arrow-right-left",
+    "close": "x",
+    "next": "chevron-right",
+    "up": "arrow-up",
+    "stop": "square",
+    "dropdown": "chevron-down",
+    "circle": "circle",
+    "checked": "circle-check",
+    "edit": "pencil",
+    "check": "check"
+  }
+}

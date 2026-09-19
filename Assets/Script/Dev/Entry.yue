@@ -1731,11 +1731,15 @@ startMobileUI = ->
 		initialEntries["discover"] = rememberedMobileFeedState["discover"]
 		feedOptions.initialEntries = initialEntries
 		feedHost = trackMobileHost mobileFeed.startMobileFeed feedOptions
-	startMobilePlay = (entry) ->
+	startMobilePlay = (entry, resumeRemix = false) ->
 		return if HttpServer.wsConnectionCount > 0
 		originFeed = feedHost
-		remixHost\removeFromParent true if remixHost
-		remixHost = nil
+		originRemix = resumeRemix and remixHost or nil
+		if originRemix
+			originRemix.visible = false
+		else
+			remixHost\removeFromParent true if remixHost
+			remixHost = nil
 		mobileLaunchErrors[entry.id] = nil
 		entry.launchError = nil
 		playActive = true
@@ -1745,7 +1749,11 @@ startMobileUI = ->
 			allClear!
 			isInEntry = true
 			currentEntry = nil
-			restartMobileFeed entry
+			if originRemix and originRemix.parent and mobileMode
+				originRemix.visible = true
+				originRemix\emit "ResumePreview", mobileLaunchErrors[entry.id]
+			else
+				restartMobileFeed entry
 		trackMobileHost playOverlay.startMobilePlayOverlay {
 			onExit: -> restoreMobileFeed!
 			onRuntimeError: ->
@@ -1810,19 +1818,20 @@ startMobileUI = ->
 					return success: true, :entry
 			success: false, error: "created-project-not-found"
 		onPlay: (entry) -> startMobilePlay entry
-		onRemix: (entry) ->
+		onRemix: (entry, createProject) ->
 			return if HttpServer.wsConnectionCount > 0
 			remix = oldRequire "Script.Dev.Mobile.Remix"
 			originFeed = feedHost
 			feedHost.visible = false
 			remixHost = trackMobileHost remix.startMobileRemix {
 				:entry
+				:createProject
 				onProjectChanged: (current) -> feedOptions.dirtyProjectPath = current.workDir
 				onBack: ->
 					if mobileMode and feedHost == originFeed and originFeed.parent
-						originFeed\emit "RestoreFeedEntry", entry
+						originFeed\emit "RestoreFeedEntry", entry if entry.workDir
 						originFeed.visible = true
-				onPlay: (current) -> startMobilePlay current
+				onPlay: (current) -> startMobilePlay current, true
 			}
 	}
 	restartMobileFeed!

@@ -1,0 +1,20 @@
+/** Shared Go appearance. ARGB surfaces and RGB text use the same palette. */
+export const goTheme = {
+	background: 0xffeae9e5,
+	backgroundTop: 0xfff1eddd,
+	panel: 0xfffafbf5,
+	panelRaised: 0xffedeee4,
+	text: 0xff30352b,
+	muted: 0xff7c826f,
+	brand: 0xffffdb66,
+	border: 0xffd2d6c5,
+	danger: 0xffb94c4c,
+	button: 0xfff7f2d9,
+	buttonBorder: 0xffc8cba9,
+	buttonText: 0xff5f6a40,
+	radius: 10,
+	font: "DoraUISans-Regular",
+	headingFont: "DoraUISans-Medium",
+	fontScale: 1,
+	monoFont: "sarasa-mono-sc-regular",
+};

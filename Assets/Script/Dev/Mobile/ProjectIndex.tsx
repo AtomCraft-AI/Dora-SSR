@@ -1,10 +1,13 @@
-import { React } from "DoraX";
+import { goTheme } from "Dev/Mobile/Theme";
+import { GoIcon } from "Dev/Mobile/Visual";
+import { pressFeedback } from "Dev/Mobile/Motion";
+import { React, toNode } from "DoraX";
 import { Color, Color3, DrawNode, Label, Node, Size, Vec2 } from "Dora";
 import * as ScrollArea from "UI/Control/Basic/ScrollArea";
 import { attachGamepad, selectGamepadNode } from "Dev/Mobile/Gamepad";
 import { groupFeedProjects, type FeedEntry } from "Dev/Mobile/FeedModel";
 
-const fontName = "sarasa-mono-sc-regular";
+const fontName = goTheme.font;
 const headerHeight = 72;
 const railWidth = 48;
 const groupHeight = 36;
@@ -76,12 +79,15 @@ export function ProjectIndex(props: {
 		const discover = props.kind === "discover";
 		const canRefresh = discover && props.onRefresh !== undefined;
 		const footerHeight = canRefresh ? 64 : 36;
-		addLabel(root, `${discover ? (props.zh ? "发现作品" : "DISCOVER") : (props.zh ? "本地作品" : "LOCAL")} · ${props.entries.length}`, 18, 0xfff4f1e8,
+		addLabel(root, `${discover ? (props.zh ? "发现作品" : "DISCOVER") : (props.zh ? "本地作品" : "LOCAL")} · ${props.entries.length}`, 18, 0xff30352b,
 			16, props.height - 34);
 		const back = Node(); back.tag = "mobile-project-index-back"; back.anchor = Vec2.zero;
 		back.position = Vec2(props.width - 96, props.height - 62); back.size = Size(80, 44); back.touchEnabled = true; back.swallowTouches = true;
+		const backIcon = toNode(GoIcon({name: "next", x: 68, y: 13, size: 18}));
+		if (backIcon) back.addChild(backIcon);
+		pressFeedback(back);
 		back.onTapped(props.onClose); back.addTo(root);
-		addLabel(back, props.zh ? "返回 ›" : "Back ›", 18, 0xffffcc33, 80, 22, Vec2(1, 0.5));
+		addLabel(back, props.zh ? "返回" : "Back", 14, 0xff927527, 60, 22, Vec2(1, 0.5));
 
 		const groups = groupFeedProjects(props.entries);
 		const listX = railWidth + 8;
@@ -100,28 +106,28 @@ export function ProjectIndex(props: {
 			heading.size = Size(listWidth, groupHeight); heading.addTo(scroll.view);
 			const groupTitle = group.key === "#" ? (props.zh ? "其它" : "Other") : group.key;
 			const headingBg = DrawNode();
-			headingBg.drawSegment(Vec2(38, 18), Vec2(listWidth - 4, 18), 0.5, Color(0xff343b48));
+			headingBg.drawSegment(Vec2(38, 18), Vec2(listWidth - 4, 18), 0.5, Color(0xffd2d6c5));
 			headingBg.addTo(heading);
-			addLabel(heading, groupTitle, 12, 0xffffcc33, 8, 18);
+			addLabel(heading, groupTitle, 12, 0xff927527, 8, 18);
 			total += groupHeight;
 			for (const entry of group.entries) {
 				const row = Node(); row.tag = `mobile-project-index-entry-${flat.length}`; row.anchor = Vec2(0, 1);
 				row.position = Vec2(0, listHeight - total); row.size = Size(listWidth, rowHeight);
-				row.touchEnabled = true; row.swallowTouches = true; row.onTapped(() => props.onSelect(entry)); row.addTo(scroll.view);
+				pressFeedback(row); row.touchEnabled = true; row.swallowTouches = true; row.onTapped(() => props.onSelect(entry)); row.addTo(scroll.view);
 				const selected = entry === props.current || (entry.fileName !== undefined && entry.fileName === props.current?.fileName)
 					|| (entry.workDir !== undefined && entry.workDir === props.current?.workDir);
 				const rowBg = DrawNode();
-				rowBg.drawSegment(Vec2(8, 1), Vec2(listWidth - 8, 1), 0.5, Color(0xff242b37));
-				if (selected) rowBg.drawSegment(Vec2(5, 13), Vec2(5, rowHeight - 13), 1.5, Color(0xffffcc33));
+				rowBg.drawSegment(Vec2(8, 1), Vec2(listWidth - 8, 1), 0.5, Color(0xffd2d6c5));
+				if (selected) rowBg.drawSegment(Vec2(5, 13), Vec2(5, rowHeight - 13), 1.5, Color(0xff927527));
 				rowBg.addTo(row);
 				addLabel(row, ellipsize(entry.title, math.max(8, math.floor((listWidth - 54) / 9))), 14,
-					selected ? 0xffffcc33 : 0xfff4f1e8, 16, rowHeight / 2);
+					selected ? 0xff927527 : 0xff30352b, 16, rowHeight / 2);
 				flat.push({ entry, node: row, groupIndex, centerFromTop: total + rowHeight / 2 });
 				total += rowHeight;
 			}
 		}
 		if (groups.length === 0) {
-			addLabel(scroll.view, discover ? (props.zh ? "暂无发现作品" : "No discovered games yet") : (props.zh ? "还没有本地作品" : "No local games yet"), 14, 0xff777e8c,
+			addLabel(scroll.view, discover ? (props.zh ? "暂无发现作品" : "No discovered games yet") : (props.zh ? "还没有本地作品" : "No local games yet"), 14, 0xff7c826f,
 				listWidth / 2, listHeight / 2, Vec2(0.5, 0.5));
 		}
 		scroll.resetSize(listWidth, listHeight, listWidth, total);
@@ -137,8 +143,8 @@ export function ProjectIndex(props: {
 
 		const popup = Node(); popup.visible = false; popup.position = Vec2(railWidth + 48, props.height / 2); popup.addTo(root);
 		const popupShape = DrawNode();
-		popupShape.drawPolygon(roundedVerts(-28, -28, 56, 56, 16), Color(0xff171c26), 1, Color(0xff806b1c)); popupShape.addTo(popup);
-		const popupLabel = addLabel(popup, "", 18, 0xffffcc33, 0, 0, Vec2(0.5, 0.5));
+		popupShape.drawPolygon(roundedVerts(-28, -28, 56, 56, 16), Color(0xfffafbf5), 1, Color(0xffc8cba9)); popupShape.addTo(popup);
+		const popupLabel = addLabel(popup, "", 18, 0xff927527, 0, 0, Vec2(0.5, 0.5));
 		popupLabel.tag = "mobile-project-index-popup-label";
 		const rail = Node(); rail.tag = "mobile-project-index-rail"; rail.anchor = Vec2.zero;
 		rail.position = Vec2(0, footerHeight); rail.size = Size(railWidth, listHeight);
@@ -146,7 +152,7 @@ export function ProjectIndex(props: {
 		const railLabels: Label.Type[] = [];
 		for (let i = 0; i < groups.length; i++) {
 			const y = listHeight - (i + 0.5) * listHeight / groups.length;
-			railLabels.push(addLabel(rail, groups[i].key, groups.length > 20 ? 9 : 11, 0xff777e8c, railWidth / 2, y, Vec2(0.5, 0.5)));
+			railLabels.push(addLabel(rail, groups[i].key, groups.length > 20 ? 9 : 11, 0xff7c826f, railWidth / 2, y, Vec2(0.5, 0.5)));
 		}
 		let activeGroup = flat[selectedIndex]?.groupIndex ?? 0;
 		const selectGroup = (groupIndex: number, showPopup: boolean, jump = true) => {
@@ -156,7 +162,7 @@ export function ProjectIndex(props: {
 				scroll.unschedule(); scroll.offset = Vec2(0, math.max(0, math.min(maxOffset(), groupOffsets[activeGroup])));
 				scroll.view.moveAndCullItems(Vec2.zero);
 			}
-			for (let i = 0; i < railLabels.length; i++) railLabels[i].color3 = Color3(i === activeGroup ? 0xffffcc33 : 0x777e8c);
+			for (let i = 0; i < railLabels.length; i++) railLabels[i].color3 = Color3(i === activeGroup ? 0xff927527 : 0x7c826f);
 			popupLabel.text = groups[activeGroup].key === "#" ? (props.zh ? "其它" : "Other") : groups[activeGroup].key;
 			popup.visible = showPopup;
 		};
@@ -176,16 +182,16 @@ export function ProjectIndex(props: {
 			const refresh = Node(); refresh.tag = "mobile-project-index-refresh";
 			refresh.anchor = Vec2.zero; refresh.position = Vec2(16, 10); refresh.size = Size(76, 44);
 			refresh.touchEnabled = !props.refreshing; refresh.swallowTouches = true;
-			refresh.onTapped(() => { if (!props.refreshing) props.onRefresh?.(); }); refresh.addTo(root);
+			pressFeedback(refresh); refresh.onTapped(() => { if (!props.refreshing) props.onRefresh?.(); }); refresh.addTo(root);
 			const border = DrawNode(); border.renderOrder = 15001;
-			border.drawPolygon(roundedVerts(0, 6, 76, 32, 16), Color(0), 0.5, Color(props.refreshing ? 0xff343b48 : 0xff806b1c)); border.addTo(refresh);
+			border.drawPolygon(roundedVerts(0, 6, 76, 32, 16), Color(0), 0.5, Color(props.refreshing ? 0xffd2d6c5 : 0xffc8cba9)); border.addTo(refresh);
 			addLabel(refresh, props.refreshing ? (props.zh ? "刷新中…" : "Syncing…") : (props.zh ? "刷新" : "Refresh"), 12,
-				props.refreshing ? 0xffa8afbd : 0xffffcc33, 38, 22, Vec2(0.5, 0.5));
-			const status = addLabel(root, "", 11, 0xffa8afbd, 104, 32);
+				props.refreshing ? 0xff7c826f : 0xff927527, 38, 22, Vec2(0.5, 0.5));
+			const status = addLabel(root, "", 11, 0xff7c826f, 104, 32);
 			status.tag = "mobile-project-index-refresh-status";
 			const update = (message: string) => { status.text = ellipsize(string.gsub(message !== "" ? message : hint, "[\r\n]+", " ")[0], math.max(4, math.floor((props.width - 120) / 11))); };
 			update(props.refreshStatus ?? ""); props.onStatusReady?.(update);
-		} else addLabel(root, hint, 9, 0xff777e8c, props.width / 2, footerHeight / 2, Vec2(0.5, 0.5));
+		} else addLabel(root, hint, 9, 0xff7c826f, props.width / 2, footerHeight / 2, Vec2(0.5, 0.5));
 		const moveSelection = (delta: number) => {
 			if (flat.length === 0) return;
 			selectedIndex = math.max(0, math.min(flat.length - 1, selectedIndex + delta));

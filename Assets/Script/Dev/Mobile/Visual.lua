@@ -1,154 +1,348 @@
--- [tsx]: Visual.tsx
-local ____exports = {} -- 1
-local ____DoraX = require("DoraX") -- 1
-local React = ____DoraX.React -- 1
-local ____Dora = require("Dora") -- 2
-local Color = ____Dora.Color -- 2
-local Node = ____Dora.Node -- 2
-local Size = ____Dora.Size -- 2
-local Vec2 = ____Dora.Vec2 -- 2
-local nvg = require("nvg") -- 3
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__ArrayPush = ____lualib.__TS__ArrayPush
+local __TS__ArraySlice = ____lualib.__TS__ArraySlice
+local ____exports = {}
+local ____DoraX = require("DoraX")
+local React = ____DoraX.React
+local ____Dora = require("Dora")
+local Color = ____Dora.Color
+local Node = ____Dora.Node
+local Size = ____Dora.Size
+local Vec2 = ____Dora.Vec2
+local nvg = require("nvg")
 --- NanoVG surface following Dora-Example/UIX's PaintNode + roundedPanel pattern.
-function ____exports.RoundedSurface(props) -- 22
-	local function onCreate() -- 23
-		local node = Node() -- 24
-		node.anchor = Vec2.zero -- 25
-		node.size = Size(props.width, props.height) -- 26
-		node:onRender(function() -- 27
-			nvg.Save() -- 28
-			nvg.ApplyTransform(node) -- 29
-			local radius = math.max( -- 30
-				0, -- 30
-				math.min(props.radius, props.width / 2, props.height / 2) -- 30
-			) -- 30
-			if props.shadow then -- 30
-				nvg.BeginPath() -- 32
-				nvg.RoundedRect( -- 33
-					2, -- 33
-					-3, -- 33
-					props.width, -- 33
-					props.height, -- 33
-					radius -- 33
-				) -- 33
-				nvg.FillColor(Color(1375731712)) -- 34
-				nvg.Fill() -- 35
-			end -- 35
-			nvg.BeginPath() -- 37
-			nvg.RoundedRect( -- 38
-				0, -- 38
-				0, -- 38
-				props.width, -- 38
-				props.height, -- 38
-				radius -- 38
-			) -- 38
-			if props.topColor ~= nil and props.bottomColor ~= nil then -- 38
-				nvg.FillPaint(nvg.LinearGradient( -- 40
-					0, -- 40
-					props.height, -- 40
-					0, -- 40
-					0, -- 40
-					Color(props.topColor), -- 40
-					Color(props.bottomColor) -- 40
-				)) -- 40
-			else -- 40
-				nvg.FillColor(Color(props.fillColor or 4294967295)) -- 42
-			end -- 42
-			nvg.Fill() -- 44
-			local borderWidth = props.borderWidth or 0 -- 45
-			if borderWidth > 0 then -- 45
-				nvg.BeginPath() -- 47
-				nvg.RoundedRect( -- 48
-					borderWidth / 2, -- 48
-					borderWidth / 2, -- 48
-					props.width - borderWidth, -- 48
-					props.height - borderWidth, -- 48
-					math.max(0, radius - borderWidth / 2) -- 48
-				) -- 48
-				nvg.StrokeWidth(borderWidth) -- 49
-				nvg.StrokeColor(Color(props.borderColor or 4294967295)) -- 50
-				nvg.Stroke() -- 51
-			end -- 51
-			nvg.Restore() -- 53
-			return false -- 54
-		end) -- 27
-		return node -- 56
-	end -- 23
-	return React.createElement("custom-node", { -- 58
-		x = props.x or 0, -- 58
-		y = props.y or 0, -- 58
-		width = props.width, -- 58
-		height = props.height, -- 58
-		opacity = props.opacity or 1, -- 58
-		renderOrder = props.renderOrder, -- 58
-		onCreate = onCreate -- 58
-	}) -- 58
-end -- 22
-function ____exports.VerticalGradient(props) -- 61
-	local function onCreate() -- 62
-		local node = Node() -- 63
-		node.anchor = Vec2.zero -- 64
-		node.size = Size(props.width, props.height) -- 65
-		node:onRender(function() -- 66
-			nvg.Save() -- 67
-			nvg.ApplyTransform(node) -- 68
-			nvg.BeginPath() -- 69
-			nvg.Rect(0, 0, props.width, props.height) -- 70
-			nvg.FillPaint(nvg.LinearGradient( -- 71
-				0, -- 71
-				props.height, -- 71
-				0, -- 71
-				0, -- 71
-				Color(props.topColor), -- 71
-				Color(props.bottomColor) -- 71
-			)) -- 71
-			nvg.Fill() -- 72
-			nvg.Restore() -- 73
-			return false -- 74
-		end) -- 66
-		return node -- 76
-	end -- 62
-	return React.createElement("custom-node", { -- 78
-		x = props.x or 0, -- 78
-		y = props.y or 0, -- 78
-		width = props.width, -- 78
-		height = props.height, -- 78
-		onCreate = onCreate -- 78
-	}) -- 78
-end -- 61
-function ____exports.roundedRectVerts(width, height, radius) -- 81
-	local r = math.max( -- 82
-		0, -- 82
-		math.min(radius, width / 2, height / 2) -- 82
-	) -- 82
-	local verts = {} -- 83
-	local corners = {{x = width - r, y = r, start = -math.pi / 2}, {x = width - r, y = height - r, start = 0}, {x = r, y = height - r, start = math.pi / 2}, {x = r, y = r, start = math.pi}} -- 84
-	for ____, corner in ipairs(corners) do -- 90
-		do -- 90
-			local step = 0 -- 91
-			while step <= 6 do -- 91
-				local angle = corner.start + step * math.pi / 12 -- 92
-				verts[#verts + 1] = Vec2( -- 93
-					corner.x + math.cos(angle) * r, -- 93
-					corner.y + math.sin(angle) * r -- 93
-				) -- 93
-				step = step + 1 -- 91
-			end -- 91
-		end -- 91
-	end -- 91
-	return verts -- 96
-end -- 81
+function ____exports.RoundedSurface(props)
+	local function onCreate()
+		local node = Node()
+		node.anchor = Vec2.zero
+		node.size = Size(props.width, props.height)
+		node:onRender(function()
+			nvg.Save()
+			nvg.ApplyTransform(node)
+			local radius = math.max(
+				0,
+				math.min(props.radius, props.width / 2, props.height / 2)
+			)
+			if props.shadow then
+				nvg.BeginPath()
+				nvg.RoundedRect(
+					2,
+					-3,
+					props.width,
+					props.height,
+					radius
+				)
+				nvg.FillColor(Color(1375731712))
+				nvg.Fill()
+			end
+			nvg.BeginPath()
+			nvg.RoundedRect(
+				0,
+				0,
+				props.width,
+				props.height,
+				radius
+			)
+			if props.topColor ~= nil and props.bottomColor ~= nil then
+				nvg.FillPaint(nvg.LinearGradient(
+					0,
+					props.height,
+					0,
+					0,
+					Color(props.topColor),
+					Color(props.bottomColor)
+				))
+			else
+				nvg.FillColor(Color(props.fillColor or 4294967295))
+			end
+			nvg.Fill()
+			local borderWidth = props.borderWidth or 0
+			if borderWidth > 0 then
+				nvg.BeginPath()
+				nvg.RoundedRect(
+					borderWidth / 2,
+					borderWidth / 2,
+					props.width - borderWidth,
+					props.height - borderWidth,
+					math.max(0, radius - borderWidth / 2)
+				)
+				nvg.StrokeWidth(borderWidth)
+				nvg.StrokeColor(Color(props.borderColor or 4294967295))
+				nvg.Stroke()
+			end
+			nvg.Restore()
+			return false
+		end)
+		return node
+	end
+	return React.createElement("custom-node", {
+		x = props.x or 0,
+		y = props.y or 0,
+		width = props.width,
+		height = props.height,
+		opacity = props.opacity or 1,
+		renderOrder = props.renderOrder,
+		onCreate = onCreate
+	})
+end
+function ____exports.VerticalGradient(props)
+	local function onCreate()
+		local node = Node()
+		node.anchor = Vec2.zero
+		node.size = Size(props.width, props.height)
+		node:onRender(function()
+			nvg.Save()
+			nvg.ApplyTransform(node)
+			nvg.BeginPath()
+			nvg.Rect(0, 0, props.width, props.height)
+			nvg.FillPaint(nvg.LinearGradient(
+				0,
+				props.height,
+				0,
+				0,
+				Color(props.topColor),
+				Color(props.bottomColor)
+			))
+			nvg.Fill()
+			nvg.Restore()
+			return false
+		end)
+		return node
+	end
+	return React.createElement("custom-node", {
+		x = props.x or 0,
+		y = props.y or 0,
+		width = props.width,
+		height = props.height,
+		onCreate = onCreate
+	})
+end
+function ____exports.roundedRectVerts(width, height, radius, bottomRadius)
+	if bottomRadius == nil then
+		bottomRadius = radius
+	end
+	local r = math.max(
+		0,
+		math.min(radius, width / 2, height / 2)
+	)
+	local b = math.max(
+		0,
+		math.min(bottomRadius, width / 2, height / 2)
+	)
+	local verts = {}
+	local corners = {{x = width - b, y = b, r = b, start = -math.pi / 2}, {x = width - r, y = height - r, r = r, start = 0}, {x = r, y = height - r, r = r, start = math.pi / 2}, {x = b, y = b, r = b, start = math.pi}}
+	for ____, corner in ipairs(corners) do
+		do
+			local step = 0
+			while step <= 12 do
+				local angle = corner.start + step * math.pi / 24
+				verts[#verts + 1] = Vec2(
+					corner.x + math.cos(angle) * corner.r,
+					corner.y + math.sin(angle) * corner.r
+				)
+				step = step + 1
+			end
+		end
+	end
+	return verts
+end
 --- Stencil-only rounded path for clipping sprites and other scene nodes.
-function ____exports.RoundedStencil(props) -- 100
-	return React.createElement( -- 101
-		"draw-node", -- 101
-		nil, -- 101
-		React.createElement( -- 101
-			"polygon-shape", -- 101
-			{ -- 101
-				verts = ____exports.roundedRectVerts(props.width, props.height, props.radius), -- 101
-				fillColor = 4294967295 -- 101
-			} -- 101
-		) -- 101
-	) -- 101
-end -- 100
-return ____exports -- 100
+function ____exports.RoundedStencil(props)
+	return React.createElement(
+		"draw-node",
+		nil,
+		React.createElement(
+			"polygon-shape",
+			{
+				verts = ____exports.roundedRectVerts(props.width, props.height, props.radius),
+				fillColor = 4294967295
+			}
+		)
+	)
+end
+--- Ordered surfaces with a subpixel alpha fringe instead of hard polygon strokes.
+function ____exports.SceneSurface(props)
+	local w = props.width
+	local h = props.height
+	local top = Color(props.topColor or props.fillColor or 4294967295)
+	local bottom = Color(props.bottomColor or props.fillColor or 4294967295)
+	local function shade(y)
+		local t = math.max(
+			0,
+			math.min(
+				1,
+				y / math.max(1, h)
+			)
+		)
+		return math.floor(bottom.a + (top.a - bottom.a) * t) * 16777216 + math.floor(bottom.r + (top.r - bottom.r) * t) * 65536 + math.floor(bottom.g + (top.g - bottom.g) * t) * 256 + math.floor(bottom.b + (top.b - bottom.b) * t)
+	end
+	local function faded(c, alpha)
+		return math.floor(Color(c).a * alpha) * 16777216 + c % 16777216
+	end
+	local function loop(inset)
+		return __TS__ArrayMap(
+			____exports.roundedRectVerts(
+				math.max(0, w - 2 * inset),
+				math.max(0, h - 2 * inset),
+				math.max(0, props.radius - inset),
+				math.max(0, (props.bottomRadius or props.radius) - inset)
+			),
+			function(____, p) return Vec2(p.x + inset, p.y + inset) end
+		)
+	end
+	local triangles = {}
+	local function ring(outer, inner, outerColor, innerColor)
+		local a = loop(outer)
+		local b = loop(inner)
+		do
+			local i = 0
+			while i < #a do
+				local j = (i + 1) % #a
+				__TS__ArrayPush(
+					triangles,
+					{
+						a[i + 1],
+						outerColor(a[i + 1].y)
+					},
+					{
+						a[j + 1],
+						outerColor(a[j + 1].y)
+					},
+					{
+						b[i + 1],
+						innerColor(b[i + 1].y)
+					},
+					{
+						a[j + 1],
+						outerColor(a[j + 1].y)
+					},
+					{
+						b[j + 1],
+						innerColor(b[j + 1].y)
+					},
+					{
+						b[i + 1],
+						innerColor(b[i + 1].y)
+					}
+				)
+				i = i + 1
+			end
+		end
+	end
+	local edge = 0.6
+	local inner = loop(edge)
+	do
+		local i = 0
+		while i < #inner do
+			local a = inner[i + 1]
+			local b = inner[(i + 1) % #inner + 1]
+			__TS__ArrayPush(
+				triangles,
+				{
+					Vec2(w / 2, h / 2),
+					shade(h / 2)
+				},
+				{
+					a,
+					shade(a.y)
+				},
+				{
+					b,
+					shade(b.y)
+				}
+			)
+			i = i + 1
+		end
+	end
+	ring(
+		-0.2,
+		edge,
+		function(y) return faded(
+			shade(y),
+			0
+		) end,
+		shade
+	)
+	local border = props.borderWidth or 0
+	local ink = props.borderColor or 4294967295
+	if border > 0 then
+		ring(
+			-0.25,
+			0.4,
+			function() return faded(ink, 0) end,
+			function() return ink end
+		)
+		if border > 0.8 then
+			ring(
+				0.4,
+				border - 0.4,
+				function() return ink end,
+				function() return ink end
+			)
+		end
+		ring(
+			math.max(0.4, border - 0.4),
+			border + 0.25,
+			function() return ink end,
+			function() return faded(ink, 0) end
+		)
+	end
+	local faces = {}
+	do
+		local i = 0
+		while i < #triangles do
+			faces[#faces + 1] = __TS__ArraySlice(triangles, i, i + 3)
+			i = i + 3
+		end
+	end
+	return React.createElement(
+		"node",
+		{x = props.x or 0, y = props.y or 0, opacity = props.opacity or 1, renderOrder = props.renderOrder},
+		props.shadow and __TS__ArrayMap(
+			{
+				5,
+				4,
+				3,
+				2,
+				1
+			},
+			function(____, i) return React.createElement(
+				"draw-node",
+				{x = 0, y = -2},
+				React.createElement(
+					"polygon-shape",
+					{
+						verts = loop(-i),
+						fillColor = 37438767
+					}
+				)
+			) end
+		) or nil,
+		React.createElement(
+			"draw-node",
+			nil,
+			__TS__ArrayMap(
+				faces,
+				function(____, face) return React.createElement("verts-shape", {verts = face}) end
+			)
+		)
+	)
+end
+function ____exports.GoIcon(props)
+	local size = props.size or 20
+	local color = props.color or 4284178772
+	return React.createElement(
+		"sprite",
+		{
+			file = ("Image/GoUI/icon-" .. props.name) .. ".png",
+			x = (props.x or 0) + size / 2,
+			y = (props.y or 0) + size / 2,
+			scaleX = size / 72,
+			scaleY = size / 72,
+			color3 = color % 16777216,
+			opacity = math.floor(color / 16777216) / 255
+		}
+	)
+end
+return ____exports

@@ -1,513 +1,592 @@
--- [ts]: RemixTranscript.ts
-local ____lualib = require("lualib_bundle") -- 1
-local __TS__ArrayMap = ____lualib.__TS__ArrayMap -- 1
-local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew -- 1
-local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush -- 1
-local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread -- 1
-local __TS__ArrayPushArray = ____lualib.__TS__ArrayPushArray -- 1
-local __TS__ArrayFind = ____lualib.__TS__ArrayFind -- 1
-local __TS__ArraySome = ____lualib.__TS__ArraySome -- 1
-local ____exports = {} -- 1
-local ____Dora = require("Dora") -- 1
-local App = ____Dora.App -- 1
-local Color = ____Dora.Color -- 1
-local Color3 = ____Dora.Color3 -- 1
-local DrawNode = ____Dora.DrawNode -- 1
-local Label = ____Dora.Label -- 1
-local Node = ____Dora.Node -- 1
-local Size = ____Dora.Size -- 1
-local Vec2 = ____Dora.Vec2 -- 1
-local ScrollArea = require("UI.Control.Basic.ScrollArea") -- 2
-local ____Utils = require("Agent.Utils") -- 4
-local safeJsonEncode = ____Utils.safeJsonEncode -- 4
-local ____RemixModel = require("Dev.Mobile.RemixModel") -- 5
-local compactAgentActivity = ____RemixModel.compactAgentActivity -- 5
-local ____LightMarkdown = require("Dev.Mobile.LightMarkdown") -- 6
-local parseLightMarkdown = ____LightMarkdown.parseLightMarkdown -- 6
-local ____RemixHistory = require("Dev.Mobile.RemixHistory") -- 7
-local remixHistory = ____RemixHistory.remixHistory -- 7
-local REMIX_HISTORY_ROUNDS = ____RemixHistory.REMIX_HISTORY_ROUNDS -- 7
-local font = "sarasa-mono-sc-regular" -- 21
-function ____exports.remixDisplayRevision(detail) -- 24
-	if not detail.success then -- 24
-		return detail.message -- 25
-	end -- 25
-	local history = remixHistory(detail) -- 26
-	return (safeJsonEncode({ -- 27
-		status = detail.session.status, -- 28
-		mode = detail.session.workMode, -- 28
-		plan = detail.hasActivePlan, -- 28
-		finalizing = detail.session.currentTaskFinalizing, -- 29
-		questionnaire = detail.pendingQuestionnaire, -- 29
-		currentTaskId = detail.session.currentTaskId, -- 30
-		currentTaskStatus = detail.session.currentTaskStatus, -- 30
-		hasEarlierMessages = history.hasEarlierMessages, -- 31
-		messages = __TS__ArrayMap( -- 32
-			history.messages, -- 32
-			function(____, m) return {m.id, m.taskId or 0, m.role, m.displayContent or m.content} end -- 32
-		), -- 32
-		steps = __TS__ArrayMap( -- 33
-			history.steps, -- 33
-			function(____, s) -- 33
-				local ____array_12 = __TS__SparseArrayNew(s.id, s.tool, s.status, s.reason) -- 33
-				local ____opt_0 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_0 and ____opt_0.progress) -- 33
-				local ____opt_2 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_2 and ____opt_2.stage) -- 33
-				local ____opt_4 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_4 and ____opt_4.message) -- 33
-				local ____opt_6 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_6 and ____opt_6.assets) -- 33
-				local ____opt_8 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_8 and ____opt_8.report) -- 33
-				local ____opt_10 = s.result -- 33
-				__TS__SparseArrayPush(____array_12, ____opt_10 and ____opt_10.model) -- 33
-				return {__TS__SparseArraySpread(____array_12)} -- 33
-			end -- 33
-		) -- 33
-	})) or "" -- 33
-end -- 24
-local function itemsFor(detail, zh, actions) -- 37
-	if not detail.success then -- 37
-		return {} -- 38
-	end -- 38
-	local items = {} -- 39
-	local history = remixHistory(detail) -- 40
-	if history.hasEarlierMessages then -- 40
-		items[#items + 1] = { -- 41
-			id = "remix-history-limit", -- 41
-			title = zh and "历史记录" or "History", -- 41
-			text = zh and ("仅展示最近 " .. tostring(REMIX_HISTORY_ROUNDS)) .. " 轮，更早记录可在 Web IDE 查看。" or ("Showing the latest " .. tostring(REMIX_HISTORY_ROUNDS)) .. " rounds. View earlier messages in Web IDE.", -- 42
-			user = false, -- 43
-			activity = true -- 43
-		} -- 43
-	end -- 43
-	local activities = __TS__ArrayMap( -- 44
-		history.steps, -- 44
-		function(____, s) -- 44
-			local state = s.status == "DONE" and (zh and "已完成" or "Done") or (s.status == "FAILED" and (zh and "失败" or "Failed") or (s.status == "STOPPED" and (zh and "已停止" or "Stopped") or (s.status == "PENDING" and (zh and "等待中" or "Pending") or (zh and "进行中" or "Working")))) -- 45
-			local ____temp_15 = s.status == "RUNNING" -- 49
-			if ____temp_15 then -- 49
-				local ____opt_13 = s.result -- 49
-				____temp_15 = type(____opt_13 and ____opt_13.progress) == "number" -- 49
-			end -- 49
-			local progress = ____temp_15 and (" · " .. tostring(math.floor(s.result.progress * 100))) .. "%" or "" -- 49
-			local vision = s.tool == "analyze_image" -- 50
-			local ____temp_18 = s.status == "RUNNING" or vision -- 51
-			if ____temp_18 then -- 51
-				local ____opt_16 = s.result -- 51
-				____temp_18 = type(____opt_16 and ____opt_16.message) == "string" -- 51
-			end -- 51
-			local message = ____temp_18 and s.result.message or "" -- 51
-			local ____vision_21 = vision -- 52
-			if ____vision_21 then -- 52
-				local ____opt_19 = s.result -- 52
-				____vision_21 = type(____opt_19 and ____opt_19.report) == "string" -- 52
-			end -- 52
-			local report = ____vision_21 and s.result.report or "" -- 52
-			local ____vision_24 = vision -- 53
-			if ____vision_24 then -- 53
-				local ____opt_22 = s.result -- 53
-				____vision_24 = type(____opt_22 and ____opt_22.model) == "string" -- 53
-			end -- 53
-			local model = ____vision_24 and s.result.model or "" -- 53
-			local title = compactAgentActivity(s.tool, "", zh, s.status == "RUNNING") -- 54
-			return { -- 55
-				id = "step-" .. tostring(s.id), -- 55
-				title = ((state .. progress) .. " · ") .. title, -- 55
-				text = ((s.reason .. (message ~= "" and "\n" .. message or "")) .. (model ~= "" and (("\n" .. (zh and "看图模型" or "Vision model")) .. ": ") .. model or "")) .. (report ~= "" and "\n" .. report or ""), -- 56
-				user = false, -- 57
-				activity = true -- 57
-			} -- 57
-		end -- 44
-	) -- 44
-	local inserted = false -- 59
-	for ____, m in ipairs(history.messages) do -- 60
-		if not inserted and m.role == "assistant" and m.taskId == detail.session.currentTaskId then -- 60
-			__TS__ArrayPushArray(items, activities) -- 63
-			inserted = true -- 63
-		end -- 63
-		items[#items + 1] = { -- 65
-			id = "message-" .. tostring(m.id), -- 65
-			title = m.role == "user" and (zh and "你" or "You") or "Dora", -- 65
-			text = m.displayContent or m.content, -- 66
-			user = m.role == "user", -- 66
-			activity = false -- 66
-		} -- 66
-	end -- 66
-	if not inserted then -- 66
-		__TS__ArrayPushArray(items, activities) -- 68
-	end -- 68
-	if #actions > 0 then -- 68
-		items[#items + 1] = { -- 69
-			id = "remix-terminal-actions", -- 69
-			title = "", -- 69
-			text = "", -- 69
-			user = false, -- 69
-			activity = true, -- 69
-			actions = actions -- 69
-		} -- 69
-	end -- 69
-	return items -- 70
-end -- 37
-local function drawCapsule(target, width, height, color, inset) -- 73
-	if inset == nil then -- 73
-		inset = 0 -- 73
-	end -- 73
-	local radius = height / 2 - inset -- 74
-	local left = height / 2 -- 75
-	local right = width - height / 2 -- 76
-	target:drawPolygon( -- 77
-		{ -- 77
-			Vec2(left, inset), -- 77
-			Vec2(right, inset), -- 77
-			Vec2(right, height - inset), -- 77
-			Vec2(left, height - inset) -- 77
-		}, -- 77
-		Color(color) -- 77
-	) -- 77
-	target:drawDot( -- 78
-		Vec2(left, height / 2), -- 78
-		radius, -- 78
-		Color(color) -- 78
-	) -- 78
-	target:drawDot( -- 79
-		Vec2(right, height / 2), -- 79
-		radius, -- 79
-		Color(color) -- 79
-	) -- 79
-end -- 73
-local function makeActionRow(actions, width, scale) -- 82
-	local card = Node() -- 83
-	card.tag = "remix-terminal-actions" -- 84
-	card.anchor = Vec2(0, 1) -- 85
-	card.width = width -- 86
-	card.height = 44 -- 87
-	local gap = 10 -- 88
-	local buttonWidth = #actions > 1 and math.min((width - gap) / 2, 184) or math.min(width, 184) -- 89
-	do -- 89
-		local i = 0 -- 90
-		while i < #actions do -- 90
-			local action = actions[i + 1] -- 91
-			local button = Node() -- 92
-			button.tag = "remix-action-" .. action.id -- 93
-			button.anchor = Vec2.zero -- 94
-			button.position = Vec2(i * (buttonWidth + gap), 3) -- 95
-			button.size = Size(buttonWidth, 38) -- 96
-			button.touchEnabled = true -- 97
-			button.swallowTouches = true -- 98
-			button:onTapped(action.onTapped) -- 99
-			local bg = DrawNode() -- 100
-			if action.primary then -- 100
-				drawCapsule(bg, buttonWidth, 38, 4294954035) -- 101
-			else -- 101
-				drawCapsule(bg, buttonWidth, 38, 4282798180) -- 103
-				drawCapsule( -- 104
-					bg, -- 104
-					buttonWidth, -- 104
-					38, -- 104
-					4279704614, -- 104
-					1 -- 104
-				) -- 104
-			end -- 104
-			button:addChild(bg) -- 106
-			local label = Label( -- 107
-				font, -- 107
-				math.floor(14 * scale), -- 107
-				true -- 107
-			) -- 107
-			if label then -- 107
-				label.position = Vec2(buttonWidth / 2, 19) -- 109
-				label.color3 = Color3(action.primary and 1512202 or 16052712) -- 110
-				label.text = action.text -- 111
-				button:addChild(label) -- 112
-			end -- 112
-			card:addChild(button) -- 114
-			i = i + 1 -- 90
-		end -- 90
-	end -- 90
-	return card -- 116
-end -- 82
-local function makeCard(item, width, scale, zh) -- 119
-	if item.actions then -- 119
-		return makeActionRow(item.actions, width, scale) -- 120
-	end -- 120
-	local card = Node() -- 121
-	card.tag = item.id -- 122
-	card.anchor = Vec2(0, 1) -- 123
-	card.width = width -- 124
-	local labels = {} -- 125
-	local top = 12 -- 126
-	local function add(text, size, color) -- 127
-		local l = Label( -- 128
-			font, -- 128
-			math.floor(size * scale), -- 128
-			true -- 128
-		) -- 128
-		if not l then -- 128
-			return -- 129
-		end -- 129
-		l.anchor = Vec2(0, 1) -- 130
-		l.x = 14 -- 130
-		l.textWidth = math.max(20, width - 28) -- 130
-		l.alignment = "Left" -- 131
-		l.lineGap = 4 -- 131
-		l.color3 = Color3(color) -- 131
-		l.text = text -- 131
-		labels[#labels + 1] = {label = l, top = top} -- 132
-		top = top + (l.height + 8) -- 132
-	end -- 127
-	add(item.title, 13, (item.user or item.activity) and 16763955 or 11055037) -- 134
-	for ____, block in ipairs(parseLightMarkdown(item.text)) do -- 135
-		add(block.text, block.kind == "heading1" and 17 or (block.kind == "heading2" and 16 or 14), block.kind == "code" and 16763955 or 16052712) -- 136
-	end -- 136
-	if not item.user and not item.activity then -- 136
-		add(zh and "复制全文" or "Copy message", 13, 16763955) -- 140
-		local ____opt_25 = labels[#labels] -- 140
-		local copy = ____opt_25 and ____opt_25.label -- 141
-		if copy ~= nil then -- 141
-			copy.tag = "remix-copy" -- 142
-			copy.touchEnabled = true -- 142
-			copy:onTapped(function() return App:setClipboardText(item.text) end) -- 142
-		end -- 142
-	end -- 142
-	card.height = top + 4 -- 144
-	local bg = DrawNode() -- 145
-	bg:drawPolygon( -- 146
-		{ -- 146
-			Vec2.zero, -- 146
-			Vec2(width, 0), -- 146
-			Vec2(width, card.height), -- 146
-			Vec2(0, card.height) -- 146
-		}, -- 146
-		Color(item.user and 4280297010 or 4279704614), -- 147
-		1, -- 147
-		Color(4281613128) -- 147
-	) -- 147
-	card:addChild(bg) -- 148
-	for ____, row in ipairs(labels) do -- 149
-		row.label.y = card.height - row.top -- 149
-		card:addChild(row.label) -- 149
-	end -- 149
-	return card -- 150
-end -- 119
-function ____exports.createRemixTranscript() -- 153
-	local node = Node() -- 154
-	node.tag = "remix-transcript" -- 154
-	node.anchor = Vec2.zero -- 154
-	local scroll = ScrollArea({ -- 155
-		width = 1, -- 155
-		height = 1, -- 155
-		paddingX = 0, -- 155
-		paddingY = 40, -- 155
-		scrollBar = false -- 155
-	}) -- 155
-	scroll.tag = "remix-scroll" -- 156
-	scroll:addTo(node) -- 156
-	local latest = Label(font, 14, true) -- 157
-	latest.tag = "remix-latest" -- 158
-	latest.color3 = Color3(16763955) -- 158
-	latest.touchEnabled = true -- 158
-	local hintBackground = DrawNode() -- 159
-	hintBackground.order = 1 -- 159
-	hintBackground:addTo(node) -- 159
-	latest.order = 2 -- 160
-	latest:addTo(node) -- 161
-	local width = 1 -- 162
-	local height = 1 -- 162
-	local scale = 1 -- 162
-	local zh = true -- 162
-	local total = 0 -- 162
-	local following = true -- 163
-	local touching = false -- 163
-	local layingOut = false -- 163
-	local unread = false -- 163
-	local rows = {} -- 164
-	local function maxOffset() -- 165
-		return math.max(0, total - height) -- 165
-	end -- 165
-	local function updateHint() -- 166
-		latest.visible = unread and not following -- 167
-		latest.text = zh and "有新内容 · 回到最新 ↓" or "New activity · Latest ↓" -- 168
-		hintBackground.visible = latest.visible -- 169
-		hintBackground:clear() -- 170
-		local half = math.min(width / 2, latest.width / 2 + 10) -- 171
-		hintBackground:drawPolygon( -- 172
-			{ -- 172
-				Vec2(width / 2 - half, 0), -- 172
-				Vec2(width / 2 + half, 0), -- 172
-				Vec2(width / 2 + half, 28), -- 172
-				Vec2(width / 2 - half, 28) -- 172
-			}, -- 172
-			Color(4280297010) -- 172
-		) -- 172
-	end -- 166
-	scroll:slot( -- 174
-		"ScrollTouchBegan", -- 174
-		function() -- 174
-			touching = true -- 174
-		end -- 174
-	) -- 174
-	scroll:slot( -- 175
-		"ScrollTouchEnded", -- 175
-		function() -- 175
-			touching = false -- 175
-			following = maxOffset() - scroll.offset.y <= 24 -- 175
-			updateHint() -- 175
-		end -- 175
-	) -- 175
-	scroll:slot( -- 176
-		"Scrolled", -- 176
-		function() -- 176
-			if layingOut then -- 176
-				return -- 177
-			end -- 177
-			following = maxOffset() - scroll.offset.y <= 24 -- 178
-			if following then -- 178
-				unread = false -- 179
-			end -- 179
-			updateHint() -- 180
-		end -- 176
-	) -- 176
-	latest:onTapped(function() -- 182
-		scroll:unschedule() -- 183
-		touching = false -- 183
-		following = true -- 183
-		unread = false -- 183
-		scroll.offset = Vec2( -- 184
-			0, -- 184
-			maxOffset() -- 184
-		) -- 184
-		updateHint() -- 184
-	end) -- 182
-	return { -- 186
-		node = node, -- 187
-		scrollBy = function(self, amount) -- 188
-			scroll:unschedule() -- 189
-			following = false -- 190
-			scroll.offset = Vec2( -- 191
-				0, -- 191
-				math.max( -- 191
-					0, -- 191
-					math.min( -- 191
-						maxOffset(), -- 191
-						scroll.offset.y + amount -- 191
-					) -- 191
-				) -- 191
-			) -- 191
-			scroll.view:moveAndCullItems(Vec2.zero) -- 192
-			following = maxOffset() - scroll.offset.y <= 24 -- 193
-			if following then -- 193
-				unread = false -- 194
-			end -- 194
-			updateHint() -- 195
-		end, -- 188
-		update = function(self, detail, w, h, fontScale, chinese, actions) -- 197
-			if actions == nil then -- 197
-				actions = {} -- 197
-			end -- 197
-			local anchor = __TS__ArrayFind( -- 198
-				rows, -- 198
-				function(____, row) return row.node.y > 0 and row.node.y - row.node.height < height end -- 198
-			) -- 198
-			local anchorY = anchor and anchor.node.y -- 199
-			local oldOffset = scroll.offset.y -- 200
-			local layoutChanged = width ~= w or height ~= h or scale ~= fontScale or zh ~= chinese -- 201
-			width = w -- 202
-			height = h -- 202
-			scale = fontScale -- 202
-			zh = chinese -- 202
-			node.size = Size(width, height) -- 203
-			scroll.position = Vec2(width / 2, height / 2) -- 203
-			latest.position = Vec2(width / 2, 14) -- 204
-			local previous = rows -- 205
-			local changed = layoutChanged -- 206
-			rows = __TS__ArrayMap( -- 207
-				itemsFor(detail, zh, actions), -- 207
-				function(____, item) -- 207
-					local ____safeJsonEncode_36 = safeJsonEncode -- 208
-					local ____item_id_31 = item.id -- 208
-					local ____item_title_32 = item.title -- 208
-					local ____item_text_33 = item.text -- 208
-					local ____item_user_34 = item.user -- 208
-					local ____item_activity_35 = item.activity -- 209
-					local ____opt_29 = item.actions -- 209
-					local signature = (____safeJsonEncode_36({ -- 208
-						id = ____item_id_31, -- 208
-						title = ____item_title_32, -- 208
-						text = ____item_text_33, -- 208
-						user = ____item_user_34, -- 208
-						activity = ____item_activity_35, -- 209
-						actions = ____opt_29 and __TS__ArrayMap( -- 209
-							item.actions, -- 209
-							function(____, action) return {action.id, action.text, action.primary == true} end -- 209
-						) -- 209
-					})) or "" -- 209
-					local existing = __TS__ArrayFind( -- 210
-						previous, -- 210
-						function(____, row) return row.id == item.id end -- 210
-					) -- 210
-					if not layoutChanged and (existing and existing.signature) == signature then -- 210
-						return existing -- 211
-					end -- 211
-					changed = true -- 212
-					local card = makeCard(item, width, scale, zh) -- 213
-					scroll.view:addChild(card) -- 213
-					return {id = item.id, signature = signature, node = card} -- 214
-				end -- 207
-			) -- 207
-			for ____, row in ipairs(previous) do -- 216
-				if not __TS__ArraySome( -- 216
-					rows, -- 216
-					function(____, next) return next.node == row.node end -- 216
-				) then -- 216
-					row.node:removeFromParent(true) -- 216
-					changed = true -- 216
-				end -- 216
-			end -- 216
-			if not changed then -- 216
-				return -- 217
-			end -- 217
-			layingOut = true -- 218
-			scroll.offset = Vec2.zero -- 219
-			total = 0 -- 220
-			for ____, row in ipairs(rows) do -- 221
-				row.node.position = Vec2(0, height - total) -- 221
-				total = total + (row.node.height + 10) -- 221
-			end -- 221
-			if #rows > 0 then -- 221
-				total = total - 10 -- 222
-			end -- 222
-			scroll:resetSize(width, height, width, total) -- 223
-			local pinned = following and not touching -- 224
-			local ____anchor_39 -- 225
-			if anchor then -- 225
-				____anchor_39 = __TS__ArrayFind( -- 225
-					rows, -- 225
-					function(____, row) return row.id == anchor.id end -- 225
-				) -- 225
-			else -- 225
-				____anchor_39 = nil -- 225
-			end -- 225
-			local replacement = ____anchor_39 -- 225
-			local offset = pinned and maxOffset() or (replacement and anchorY ~= nil and anchorY - replacement.node.y or oldOffset) -- 226
-			scroll.offset = Vec2( -- 227
-				0, -- 227
-				math.max( -- 227
-					0, -- 227
-					math.min( -- 227
-						maxOffset(), -- 227
-						offset -- 227
-					) -- 227
-				) -- 227
-			) -- 227
-			scroll.view:moveAndCullItems(Vec2.zero) -- 228
-			layingOut = false -- 229
-			if not pinned then -- 229
-				unread = true -- 230
-			end -- 230
-			updateHint() -- 231
-		end -- 197
-	} -- 197
-end -- 153
-return ____exports -- 153
+local ____lualib = require("lualib_bundle")
+local __TS__ArrayMap = ____lualib.__TS__ArrayMap
+local __TS__SparseArrayNew = ____lualib.__TS__SparseArrayNew
+local __TS__SparseArrayPush = ____lualib.__TS__SparseArrayPush
+local __TS__SparseArraySpread = ____lualib.__TS__SparseArraySpread
+local __TS__ArrayPushArray = ____lualib.__TS__ArrayPushArray
+local __TS__ArrayFind = ____lualib.__TS__ArrayFind
+local ____exports = {}
+local ____Theme = require("Dev/Mobile/Theme")
+local goTheme = ____Theme.goTheme
+local ____Motion = require("Dev/Mobile/Motion")
+local pressFeedback = ____Motion.pressFeedback
+local ____DoraX = require("DoraX")
+local toNode = ____DoraX.toNode
+local ____Visual = require("Dev/Mobile/Visual")
+local RoundedStencil = ____Visual.RoundedStencil
+local SceneSurface = ____Visual.SceneSurface
+local ____Dora = require("Dora")
+local App = ____Dora.App
+local Color = ____Dora.Color
+local Color3 = ____Dora.Color3
+local DrawNode = ____Dora.DrawNode
+local Label = ____Dora.Label
+local Node = ____Dora.Node
+local Size = ____Dora.Size
+local Sprite = ____Dora.Sprite
+local Vec2 = ____Dora.Vec2
+local ScrollArea = require("UI/Control/Basic/ScrollArea")
+local ____Utils = require("Agent/Utils")
+local safeJsonEncode = ____Utils.safeJsonEncode
+local ____RemixModel = require("Dev/Mobile/RemixModel")
+local compactAgentActivity = ____RemixModel.compactAgentActivity
+local ____LightMarkdown = require("Dev/Mobile/LightMarkdown")
+local parseLightMarkdown = ____LightMarkdown.parseLightMarkdown
+local ____RemixHistory = require("Dev/Mobile/RemixHistory")
+local remixHistory = ____RemixHistory.remixHistory
+local REMIX_HISTORY_ROUNDS = ____RemixHistory.REMIX_HISTORY_ROUNDS
+local font = goTheme.font
+function ____exports.remixDisplayRevision(detail)
+	if not detail.success then
+		return detail.message
+	end
+	local history = remixHistory(detail)
+	return (safeJsonEncode({
+		status = detail.session.status,
+		mode = detail.session.workMode,
+		plan = detail.hasActivePlan,
+		finalizing = detail.session.currentTaskFinalizing,
+		questionnaire = detail.pendingQuestionnaire,
+		currentTaskId = detail.session.currentTaskId,
+		currentTaskStatus = detail.session.currentTaskStatus,
+		hasEarlierMessages = history.hasEarlierMessages,
+		messages = __TS__ArrayMap(
+			history.messages,
+			function(____, m) return {m.id, m.taskId or 0, m.role, m.displayContent or m.content} end
+		),
+		steps = __TS__ArrayMap(
+			history.steps,
+			function(____, s)
+				local ____array_12 = __TS__SparseArrayNew(s.id, s.tool, s.status, s.reason)
+				local ____opt_0 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_0 and ____opt_0.progress)
+				local ____opt_2 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_2 and ____opt_2.stage)
+				local ____opt_4 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_4 and ____opt_4.message)
+				local ____opt_6 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_6 and ____opt_6.assets)
+				local ____opt_8 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_8 and ____opt_8.report)
+				local ____opt_10 = s.result
+				__TS__SparseArrayPush(____array_12, ____opt_10 and ____opt_10.model)
+				return {__TS__SparseArraySpread(____array_12)}
+			end
+		)
+	})) or ""
+end
+local function itemsFor(detail, zh, actions)
+	if not detail.success then
+		return {}
+	end
+	local items = {}
+	local history = remixHistory(detail)
+	if history.hasEarlierMessages then
+		items[#items + 1] = {
+			id = "remix-history-limit",
+			title = zh and "历史记录" or "History",
+			text = zh and ("仅展示最近 " .. tostring(REMIX_HISTORY_ROUNDS)) .. " 轮，更早记录可在 Web IDE 查看。" or ("Showing the latest " .. tostring(REMIX_HISTORY_ROUNDS)) .. " rounds. View earlier messages in Web IDE.",
+			user = false,
+			activity = true
+		}
+	end
+	local activities = __TS__ArrayMap(
+		history.steps,
+		function(____, s)
+			local state = s.status == "DONE" and (zh and "已完成" or "Done") or (s.status == "FAILED" and (zh and "失败" or "Failed") or (s.status == "STOPPED" and (zh and "已停止" or "Stopped") or (s.status == "PENDING" and (zh and "等待中" or "Pending") or (zh and "进行中" or "Working"))))
+			local ____temp_15 = s.status == "RUNNING"
+			if ____temp_15 then
+				local ____opt_13 = s.result
+				____temp_15 = type(____opt_13 and ____opt_13.progress) == "number"
+			end
+			local progress = ____temp_15 and (" · " .. tostring(math.floor(s.result.progress * 100))) .. "%" or ""
+			local vision = s.tool == "analyze_image"
+			local ____temp_18 = s.status == "RUNNING" or vision
+			if ____temp_18 then
+				local ____opt_16 = s.result
+				____temp_18 = type(____opt_16 and ____opt_16.message) == "string"
+			end
+			local message = ____temp_18 and s.result.message or ""
+			local ____vision_21 = vision
+			if ____vision_21 then
+				local ____opt_19 = s.result
+				____vision_21 = type(____opt_19 and ____opt_19.report) == "string"
+			end
+			local report = ____vision_21 and s.result.report or ""
+			local ____vision_24 = vision
+			if ____vision_24 then
+				local ____opt_22 = s.result
+				____vision_24 = type(____opt_22 and ____opt_22.model) == "string"
+			end
+			local model = ____vision_24 and s.result.model or ""
+			local title = compactAgentActivity(s.tool, "", zh, s.status == "RUNNING")
+			return {
+				id = "step-" .. tostring(s.id),
+				title = ((state .. progress) .. " · ") .. title,
+				text = ((s.reason .. (message ~= "" and "\n" .. message or "")) .. (model ~= "" and (("\n" .. (zh and "看图模型" or "Vision model")) .. ": ") .. model or "")) .. (report ~= "" and "\n" .. report or ""),
+				user = false,
+				activity = true
+			}
+		end
+	)
+	local inserted = false
+	for ____, m in ipairs(history.messages) do
+		if not inserted and m.role == "assistant" and m.taskId == detail.session.currentTaskId then
+			__TS__ArrayPushArray(items, activities)
+			inserted = true
+		end
+		items[#items + 1] = {
+			id = "message-" .. tostring(m.id),
+			title = m.role == "user" and (zh and "你" or "You") or "Dora",
+			text = m.displayContent or m.content,
+			user = m.role == "user",
+			activity = false
+		}
+	end
+	if not inserted then
+		__TS__ArrayPushArray(items, activities)
+	end
+	if #actions > 0 then
+		items[#items + 1] = {
+			id = "remix-terminal-actions",
+			title = "",
+			text = "",
+			user = false,
+			activity = true,
+			actions = actions
+		}
+	end
+	return items
+end
+local function drawCapsule(target, width, height, color, inset)
+	if inset == nil then
+		inset = 0
+	end
+	local radius = height / 2 - inset
+	local left = height / 2
+	local right = width - height / 2
+	target:drawPolygon(
+		{
+			Vec2(left, inset),
+			Vec2(right, inset),
+			Vec2(right, height - inset),
+			Vec2(left, height - inset)
+		},
+		Color(color)
+	)
+	target:drawDot(
+		Vec2(left, height / 2),
+		radius,
+		Color(color)
+	)
+	target:drawDot(
+		Vec2(right, height / 2),
+		radius,
+		Color(color)
+	)
+end
+local function makeActionRow(actions, width, scale)
+	local card = Node()
+	card.tag = "remix-terminal-actions"
+	card.anchor = Vec2(0, 1)
+	card.width = width
+	card.height = 44
+	local gap = 10
+	local buttonWidth = #actions > 1 and math.min((width - gap) / 2, 184) or math.min(width, 184)
+	do
+		local i = 0
+		while i < #actions do
+			local action = actions[i + 1]
+			local button = Node()
+			button.tag = "remix-action-" .. action.id
+			button.anchor = Vec2.zero
+			button.position = Vec2(i * (buttonWidth + gap), 3)
+			button.size = Size(buttonWidth, 38)
+			button.touchEnabled = true
+			button.swallowTouches = true
+			button:onTapped(action.onTapped)
+			pressFeedback(button)
+			local bg = DrawNode()
+			if action.primary then
+				drawCapsule(bg, buttonWidth, 38, 4294954035)
+			else
+				drawCapsule(bg, buttonWidth, 38, 4291349417)
+				drawCapsule(
+					bg,
+					buttonWidth,
+					38,
+					4294439641,
+					1
+				)
+			end
+			button:addChild(bg)
+			local label = Label(
+				font,
+				math.floor(14 * scale),
+				true
+			)
+			if label then
+				label.position = Vec2(buttonWidth / 2, 19)
+				label.color3 = Color3(action.primary and 1512202 or 6253120)
+				label.text = action.text
+				button:addChild(label)
+			end
+			card:addChild(button)
+			i = i + 1
+		end
+	end
+	return card
+end
+local function makeCard(item, width, scale, zh)
+	if item.actions then
+		return makeActionRow(item.actions, width, scale)
+	end
+	local card = Node()
+	card.tag = item.id
+	card.anchor = Vec2(0, 1)
+	card.width = width
+	local bubbleWidth = item.user and width * 0.9 or width
+	local origin = item.user and width - bubbleWidth or 0
+	local padding = (item.user or item.activity) and 14 or 0
+	local labels = {}
+	local top = (item.user or item.activity) and 11 or 0
+	local function add(text, size, color, code)
+		if code == nil then
+			code = false
+		end
+		local l = Label(
+			code and goTheme.monoFont or font,
+			math.floor(size * scale),
+			true
+		)
+		if not l then
+			return
+		end
+		l.anchor = Vec2(0, 1)
+		l.x = origin + padding
+		l.textWidth = math.max(20, bubbleWidth - padding * 2)
+		l.alignment = "Left"
+		l.lineGap = 6
+		l.color3 = Color3(color)
+		l.text = text
+		labels[#labels + 1] = {label = l, top = top}
+		top = top + (l.height + 9)
+	end
+	if not item.user then
+		add(item.title, 11, 4806208)
+		if not item.activity then
+			labels[1].label.x = 34
+			labels[1].top = 5
+			top = 35
+		end
+	end
+	for ____, block in ipairs(parseLightMarkdown(item.text)) do
+		add(block.text, block.kind == "heading1" and 17 or (block.kind == "heading2" and 15 or 13), block.kind == "code" and 9072679 or 3159339, block.kind == "code")
+	end
+	if not item.user and not item.activity then
+		add(zh and "复制" or "Copy", 10, 8753269)
+		local ____opt_25 = labels[#labels]
+		local copy = ____opt_25 and ____opt_25.label
+		if copy ~= nil then
+			copy.tag = "remix-copy"
+			copy.touchEnabled = true
+			copy:onTapped(function() return App:setClipboardText(item.text) end)
+			pressFeedback(copy)
+		end
+	end
+	card.height = top + (item.user and 2 or 0)
+	if item.user or item.activity then
+		local bg = toNode(SceneSurface({
+			x = origin,
+			width = bubbleWidth,
+			height = card.height,
+			radius = item.user and 15 or 10,
+			fillColor = item.user and 4294638581 or 905969663,
+			borderWidth = item.user and 0.6 or 0,
+			borderColor = 2583691263,
+			shadow = item.user
+		}))
+		if bg then
+			card:addChild(bg)
+		end
+	end
+	if not item.user and not item.activity then
+		local avatarBg = toNode(SceneSurface({
+			x = 0,
+			y = card.height - 26,
+			width = 26,
+			height = 26,
+			radius = 9,
+			fillColor = 2298478591,
+			borderWidth = 0.6,
+			borderColor = 4294967295
+		}))
+		if avatarBg then
+			card:addChild(avatarBg)
+		end
+		local avatarClip = toNode({
+			type = "clip-node",
+			children = {},
+			props = {
+				x = 2,
+				y = card.height - 24,
+				width = 22,
+				height = 22,
+				anchorX = 0,
+				anchorY = 0,
+				stencil = RoundedStencil({width = 22, height = 22, radius = 7})
+			}
+		})
+		if avatarClip then
+			card:addChild(avatarClip)
+		end
+		local avatar = Sprite("Image/GoUI/mascot.png")
+		if avatar and avatarClip then
+			local scale = 22 / math.max(avatar.width, avatar.height)
+			avatar.scaleX = scale
+			avatar.scaleY = scale
+			avatar.position = Vec2(11, 11)
+			avatarClip:addChild(avatar)
+		end
+	end
+	for ____, row in ipairs(labels) do
+		row.label.y = card.height - row.top
+		card:addChild(row.label)
+	end
+	return card
+end
+function ____exports.createRemixTranscript()
+	local node = Node()
+	node.tag = "remix-transcript"
+	node.anchor = Vec2.zero
+	local scroll = ScrollArea({
+		width = 1,
+		height = 1,
+		paddingX = 0,
+		paddingY = 40,
+		scrollBar = false
+	})
+	scroll.tag = "remix-scroll"
+	scroll:addTo(node)
+	local latest = Sprite("Image/GoUI/icon-down.png")
+	local ____temp_27 = 18 / 72
+	latest.scaleY = ____temp_27
+	latest.scaleX = ____temp_27
+	latest.color3 = Color3(7110230)
+	local latestButton = Node()
+	latestButton.tag = "remix-latest"
+	latestButton.size = Size(44, 44)
+	latestButton.anchor = Vec2(0.5, 0.5)
+	latestButton.touchEnabled = true
+	latestButton.swallowTouches = true
+	latestButton.order = 3
+	latestButton:addTo(node)
+	local hintBackground = DrawNode()
+	hintBackground.order = 1
+	hintBackground:addTo(latestButton)
+	latest.order = 2
+	latest:addTo(latestButton)
+	latest.position = Vec2(22, 22)
+	pressFeedback(latestButton)
+	local width = 1
+	local height = 1
+	local scale = 1
+	local zh = true
+	local total = 0
+	local following = true
+	local touching = false
+	local layingOut = false
+	local lastTouchMotion = 0
+	local rows = {}
+	local function maxOffset()
+		return math.max(0, total - height)
+	end
+	hintBackground:drawDot(
+		Vec2(22, 22),
+		17,
+		Color(4291350971)
+	)
+	hintBackground:drawDot(
+		Vec2(22, 22),
+		16,
+		Color(4294770166)
+	)
+	local hintVisible
+	local function updateHint()
+		local visible = maxOffset() > 24 and not following
+		if hintVisible == visible then
+			return
+		end
+		hintVisible = visible
+		latestButton.visible = visible
+	end
+	scroll:slot(
+		"ScrollTouchBegan",
+		function()
+			touching = true
+			lastTouchMotion = App.runningTime
+		end
+	)
+	scroll:onTapMoved(function()
+		lastTouchMotion = App.runningTime
+	end)
+	scroll:slot(
+		"ScrollTouchEnded",
+		function()
+			touching = false
+			following = maxOffset() - scroll.offset.y <= 24
+			updateHint()
+		end
+	)
+	scroll:slot(
+		"Scrolled",
+		function()
+			if layingOut then
+				return
+			end
+			following = maxOffset() - scroll.offset.y <= 24
+			updateHint()
+		end
+	)
+	latestButton:onTapped(function()
+		scroll:unschedule()
+		touching = false
+		following = true
+		scroll.offset = Vec2(
+			0,
+			maxOffset()
+		)
+		updateHint()
+	end)
+	return {
+		node = node,
+		isInteracting = function(self)
+			if touching and App.runningTime - lastTouchMotion > 0.3 then
+				touching = false
+			end
+			return touching
+		end,
+		scrollBy = function(self, amount)
+			scroll:unschedule()
+			following = false
+			scroll.offset = Vec2(
+				0,
+				math.max(
+					0,
+					math.min(
+						maxOffset(),
+						scroll.offset.y + amount
+					)
+				)
+			)
+			scroll.view:moveAndCullItems(Vec2.zero)
+			following = maxOffset() - scroll.offset.y <= 24
+			updateHint()
+		end,
+		update = function(self, detail, w, h, fontScale, chinese, actions)
+			if actions == nil then
+				actions = {}
+			end
+			local anchor = __TS__ArrayFind(
+				rows,
+				function(____, row) return row.node.y > 0 and row.node.y - row.node.height < height end
+			)
+			local anchorY = anchor and anchor.node.y
+			local oldOffset = scroll.offset.y
+			local layoutChanged = width ~= w or height ~= h or scale ~= fontScale or zh ~= chinese
+			width = w
+			height = h
+			scale = fontScale
+			zh = chinese
+			node.size = Size(width, height)
+			scroll.position = Vec2(width / 2, height / 2)
+			latestButton.position = Vec2(width / 2, 17)
+			local previous = rows
+			local previousById = {}
+			local nextById = {}
+			for ____, row in ipairs(previous) do
+				previousById[row.id] = row
+			end
+			local changed = layoutChanged
+			rows = __TS__ArrayMap(
+				itemsFor(detail, zh, actions),
+				function(____, item)
+					local ____safeJsonEncode_37 = safeJsonEncode
+					local ____item_id_32 = item.id
+					local ____item_title_33 = item.title
+					local ____item_text_34 = item.text
+					local ____item_user_35 = item.user
+					local ____item_activity_36 = item.activity
+					local ____opt_30 = item.actions
+					local signature = (____safeJsonEncode_37({
+						id = ____item_id_32,
+						title = ____item_title_33,
+						text = ____item_text_34,
+						user = ____item_user_35,
+						activity = ____item_activity_36,
+						actions = ____opt_30 and __TS__ArrayMap(
+							item.actions,
+							function(____, action) return {action.id, action.text, action.primary == true} end
+						)
+					})) or ""
+					local existing = previousById[item.id]
+					if not layoutChanged and (existing and existing.signature) == signature then
+						nextById[item.id] = existing.node
+						return existing
+					end
+					changed = true
+					local card = makeCard(item, width, scale, zh)
+					scroll.view:addChild(card)
+					nextById[item.id] = card
+					return {id = item.id, signature = signature, node = card}
+				end
+			)
+			for ____, row in ipairs(previous) do
+				if nextById[row.id] ~= row.node then
+					row.node:removeFromParent(true)
+					changed = true
+				end
+			end
+			if not changed then
+				return
+			end
+			layingOut = true
+			scroll.offset = Vec2.zero
+			total = 0
+			for ____, row in ipairs(rows) do
+				row.node.position = Vec2(0, height - total)
+				total = total + (row.node.height + 22)
+			end
+			if #rows > 0 then
+				total = total - 22
+			end
+			scroll:resetSize(width, height, width, total)
+			local pinned = following and not touching
+			local ____anchor_40
+			if anchor then
+				____anchor_40 = __TS__ArrayFind(
+					rows,
+					function(____, row) return row.id == anchor.id end
+				)
+			else
+				____anchor_40 = nil
+			end
+			local replacement = ____anchor_40
+			local offset = pinned and maxOffset() or (replacement and anchorY ~= nil and anchorY - replacement.node.y or oldOffset)
+			scroll.offset = Vec2(
+				0,
+				math.max(
+					0,
+					math.min(
+						maxOffset(),
+						offset
+					)
+				)
+			)
+			scroll.view:moveAndCullItems(Vec2.zero)
+			layingOut = false
+			updateHint()
+		end
+	}
+end
+return ____exports
