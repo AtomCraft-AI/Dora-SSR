@@ -79,7 +79,6 @@
 		"perf:bundle": "node scripts/report-performance.mjs",
 		"perf:bundle:check": "node scripts/report-performance.mjs --shell-budget-kib=700",
 		"perf:log": "node scripts/performance-log-pressure.mjs",
-		"test:atompie-publish": "node --test scripts/atompie-publish.test.mjs",
 		"test:git-job-store": "xmake test-suite -P ../.. --suite=web-ide --case=test-git-job-store",
 		"test:git-progress": "xmake test-suite -P ../.. --suite=web-ide --case=test-git-progress",
 		"test:log-buffer": "xmake test-suite -P ../.. --suite=web-ide --case=test-log-buffer",

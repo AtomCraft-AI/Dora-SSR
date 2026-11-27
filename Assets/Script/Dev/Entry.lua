@@ -1,4 +1,4 @@
--- [yue]: Dev\Entry.yue
+-- [yue]: Dev/Entry.yue
 local _module_0 = { } -- 1
 local _ENV = Dora(Dora.ImGui) -- 9
 local App <const> = App -- 11
@@ -455,7 +455,7 @@ local allEntries = { -- 304
 	hasDirty = false, -- 304
 	runId = 0 -- 304
 } -- 304
-local projectCoverPaths = json.decode(Content:load(Path(Content.assetPath, "Script", "Dev", "ProjectCoverPaths.json"))) -- 305
+allEntries.projectCoverPaths = json.decode(Content:load(Path(Content.assetPath, "Script", "Dev", "ProjectCoverPaths.json"))) -- 305
 local _anon_func_1 = function(file) -- 350
 	local _val_0 = Path:getExt(file) -- 350
 	return "ts" == _val_0 or "tsx" == _val_0 -- 350
@@ -559,8 +559,9 @@ allEntries.scanDir = function(path, dir, noPreview) -- 306
 							break -- 353
 						end -- 353
 						local projectCover = nil -- 354
-						for _index_1 = 1, #projectCoverPaths do -- 355
-							local candidate = projectCoverPaths[_index_1] -- 355
+						local _list_1 = allEntries.projectCoverPaths -- 355
+						for _index_1 = 1, #_list_1 do -- 355
+							local candidate = _list_1[_index_1] -- 355
 							local candidatePath = Path(projectPath, candidate) -- 356
 							if Content:exist(candidatePath) then -- 357
 								projectCover = candidatePath -- 358

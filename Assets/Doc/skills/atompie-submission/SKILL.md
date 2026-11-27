@@ -1,29 +1,28 @@
 ---
 name: atompie-submission
-description: Prepare a Dora SSR game for AtomPie (原子派投稿), set its launcher title and cover, connect an AtomPie account and submit a game for review from the IDE.
+description: Prepare and submit a game to AtomPie (原子派) when the author requests AtomPie publication or draft management.
+requiredTools:
+  - execute_command
 ---
-<!-- dora-managed-skill:atompie-submission:v6 -->
 
-# 向原子派提交 Dora 作品
+# 向原子派投稿
 
-## 开发时配置作品卡片
+使用权限明确的当前项目。投稿只接受 AtomGit、GitHub 或 Gitee 的公开仓库首页。用 Git 核对仓库和作品所在目录，确认入口、资料和封面已提交到公开仓库默认分支。添加 remote 或推送应按作者授权执行。
 
-找到要发布的游戏的 `init.*` 所在目录。一个仓库可以包含多个游戏，每个游戏的展示配置都紧邻自己的入口。在作者确定作品名时就补上标题，有封面后再补图。
+- 作品标题、简介用所选语言读取 `.dora/repo.json` 中的 `title`、`description`，兼容同语言的 `desc`。如需补充资料，可编辑 IDE 里的「项目资料」，或合并更新项目文件并保留已有字段。
+- 详细介绍优先读作品目录的对应语言 README，其次查仓库根目录。中文查 `README.zh-CN.md`、`README.zh.md`、`README.md`，英文查 `README.en.md`。保留作者内容。从构建记录或导出包 `runtime.json` 确认原生项目的开发版本，当前引擎版本只能标为当前环境。
+- 封面优先选 `.dora/banner.jpg`、`.dora/banner.png`、`Image/banner.jpg`、`Image/banner.png`。使用作者选定的普通 PNG 或 JPEG 文件。一个仓库有多个作品时，以实际作品目录作为命令工作区。
 
-- 合并更新 `.dora/repo.json` 中的 `title.zh` 和 `title.en`，保留其它字段和已有译名。只有一个正式名称时，两种界面可共用该名称。例如 `{"title":{"zh":"窗边自习室","en":"Window Study"}}`。已有 JSON 无法解析时，先修复或向作者核对。
-- 作品的一两句简介写入同文件的 `description.zh`、`description.en`。作品资料按所选语言读取标题和简介，同语言下兼容资源下载器写入的 `desc`。作者可分别补充两个版本。详细介绍取自 README，标签由作者填写。
-- 复用作者选定的 JPG 或 PNG 封面，按实际格式写入 `.dora/banner.jpg` 或 `.dora/banner.png`。启动器先查 JPG，再查 PNG，也兼容同级 `Image/banner.jpg` 和 `Image/banner.png`。更换格式时检查是否有旧图优先生效。缺封面时可请作者选图，或经同意从游戏画面截取。
-- 投稿前用 Dora 的 Git 面板检查入口、标题和封面是否已包含在公开仓库默认分支。拉取端使用普通 Git 图片文件，LFS 指针无法作为封面显示。已导入过的项目会复用本地目录，需要拉取更新才能看到改动。
+## 执行投稿
 
-启动器还读取 `categories` 字符串数组，其中 `Tool`（忽略大小写）会把项目归入工具列表。原子派的稿件标签由作者单独选择。资源下载器还会写入资源标识 `name`、兼容简介 `desc`、可运行标记或入口目录列表 `exe`、缺少预览图标记 `noBanner`。编辑卡片时保留这些安装信息。封面按上述图片路径查找。
+用 `execute_command` 的 Lua 模式按需加载模块，每步打印返回的 JSON。下面演示读取已授权账号。
 
-## 选择仓库并投稿
+```lua
+local atompie = requireProjectModule("Doc.skills.atompie-submission.atompie")
+print(json.encode(atompie(projectDir, "account", {})))
+```
 
-整理可玩工程时，从入口与已实现的操作、玩法、启动步骤生成面向玩家的 README.md，优先放在游戏目录。Dora 原生项目从作品的构建记录或对应导出包 `runtime.json` 的 `engineVersion` 核实开发版本。引擎内的 `Dora.App.version` 表示当前环境。只取得当前环境版本时按此标注，无法核实时省略版本号。徽章文字与图片地址使用同一版本。已有 README 时保留作者内容，只更新有依据的部分。项目资料页优先读游戏目录，其次读仓库根目录；中文卡片优先读 README.zh-CN.md 或 README.zh.md，默认读 README.md。英文卡片读 README.en.md。详细介绍默认渲染 Markdown，点击「编辑」并保存可更新对应 README。未找到文件时，可在项目资料页点击「用 Dora 生成 README」。标签由作者填写。
-
-1. 在 Web IDE 或引擎内嵌编辑器双击作品目录，点击与「Dora」「文件」「Git」并列的「发布」。在「Dora 项目资料」切换中英文、核对标题和简介、编辑启动器分类，并选择和裁剪封面。这些修改自动保存到项目的 `.dora` 目录。README 在编辑器中单独保存。
-2. 选择本次发布的语言，点击「发布到原子派」。核对自动识别的开发引擎（Dora SSR、Godot、LÖVE2D 或 TIC-80）和远程仓库，填写原子派标签、游玩方式、适配平台和版本，视频链接选填。需要修改项目资料时点击「返回项目资料」。
-3. 原子派送审接受 AtomGit、GitHub 或 Gitee 的公开仓库首页。默认选择 origin，可以切换其他可用仓库。没有远程时可在「Git」中添加，提交和推送按作者授权执行。
-4. 点击「连接原子派」，让作者在浏览器中登录并核对 IDE 显示的匹配码，确认授权后返回 Dora。此浏览器再次打开 IDE 时可继续使用已连接账号。需要换账号时点击「断开连接」。
-5. 选中稿件语言和个人或组织归属，点击「保存原子派草稿」。准备送审时点击「提交中文稿审核」或「提交英文稿审核」，由作者核对作品和归属后确认。遇到请求中断时，点击「重试送审」，沿用同一次提交。
-6. 送审成功后，点击「我的稿件」到原子派查看审核进度和记录。审核通过并公开后，可从作品页点击「在 Dora SSR 中打开」，检查拉取后的作品标题和封面。
+1. `begin` 获取授权链接和匹配码。把两者显示给作者，请作者在浏览器完成授权。在作者完成后用 `poll` 传入 `user_code`，按模块返回的轮询间隔重试。用 `account` 核对账号和可选组织。短期会话仅保存在引擎内存中，过期后重新授权。`disconnect` 清除当前项目的本地会话。
+2. `create` 保存新稿件，或先用 `read` 核对作者提供的已有稿件 ID，再用 `update` 更新。稿件操作传 `account_id`，组织发稿还传 `organization_id`。创建和更新传 `title`、`short_description`、`long_description`、`repository_url`、`version`、`tags`、`game_metadata`，可选 `video_url`。`game_metadata` 含 `engine`（`dora_ssr`、`godot`、`love2d` 或 `tic_80`）、`play_modes`（`single_player`、`local_multiplayer`）和 `platforms`（`pc`、`mobile`）。标签和归属由作者确认。
+3. `cover` 传作品目录内的 `cover_path`。已有稿件操作使用 `draft_id`，更新、封面和送审还要使用最近确认返回的 `lock_version` 作为 `expected_version`。封面操作同时传原来的 `cover_file_id` 作为 `expected_file_id`（没有则省略）。更新或上传结果丢失时，先 `read` 核对平台内容和版本，再继续。
+4. 送审前展示语言、仓库、账号或组织、稿件内容和版本，请作者明确确认。用 `submit` 送审，返回审核回执及「我的稿件」链接。创建与送审各用一个独立的 `idempotency_key`（16–64 位字母、数字、下划线或连字符）。记录作品语言、稿件 ID、已确认版本及本次操作键。响应丢失时使用同一操作键和原始参数重试。确认稿件后凭回执报告结果。

@@ -3,7 +3,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Slider,
 import Cropper, { type Area } from 'react-easy-crop';
 import 'react-easy-crop/react-easy-crop.css';
 
-export default function AtomPieCoverCrop({source, label, onClose, onConfirm}: {
+export default function ProjectCoverCrop({source, label, onClose, onConfirm}: {
 	source: File | string;
 	label: (zh: string, en: string) => string;
 	onClose: () => void;

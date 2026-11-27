@@ -754,7 +754,6 @@ export interface InfoResponse {
 export const info = (req?: InfoRequest) => {
 	return post<InfoResponse>("/info", { ...req, embedded: isNativeIDE() });
 };
-export const showNativeIDE = () => post<{success:boolean}>("/ide", {action:"show"});
 
 export type TypeScriptSnapshot = {
 	projectRoot: string;
@@ -1078,7 +1077,7 @@ export const unzip = (req: UnzipRequest) => {
 
 // EditingInfo
 
-export type WorkspaceView = "agent" | "upload" | "git" | "submission";
+export type WorkspaceView = "agent" | "upload" | "git" | "details";
 
 export interface EditingInfo {
 	index: number;
