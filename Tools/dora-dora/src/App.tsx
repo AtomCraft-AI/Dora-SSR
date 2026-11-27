@@ -659,7 +659,7 @@ const transitionProps = {
 };
 
 let writablePath = "";
-const submissionFileUrl = (file: string) => {
+const projectFileUrl = (file: string) => {
 	const root = isChildFolder(file, assetPath) ? assetPath : writablePath;
 	const relative = toUrlPath(Info.path.relative(root, file), Info.path);
 	return Service.addr("/" + relative.split("/").map(encodeURIComponent).join("/"));
@@ -6108,7 +6108,7 @@ export default function PersistentDrawerLeft() {
 									agentSessionId={file.agentSessionId}
 									agentInitialPrompt={file.agentInitialPrompt}
 									view={file.workspaceView ?? "agent"}
-									fileUrl={submissionFileUrl}
+									fileUrl={projectFileUrl}
 									onGenerateReadme={generateProjectReadme}
 									addAlert={addAlert}
 									onAgentInitialPromptConsumed={() => onAgentInitialPromptConsumed(file.key)}
@@ -6625,7 +6625,7 @@ export default function PersistentDrawerLeft() {
 											displayPath={getWorkspaceDisplayPath(file.key, true)}
 											agentInitialPrompt={file.agentInitialPrompt}
 											view={file.workspaceView ?? "upload"}
-											fileUrl={submissionFileUrl}
+											fileUrl={projectFileUrl}
 											onGenerateReadme={generateProjectReadme}
 											addAlert={addAlert}
 											onAgentInitialPromptConsumed={() => onAgentInitialPromptConsumed(file.key)}

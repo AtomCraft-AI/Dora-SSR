@@ -302,7 +302,7 @@ getFileEntries = (path, recursive = true, excludeFiles = nil) ->
 	entries
 
 local allEntries = {dirty: {}, hasDirty: false, runId: 0}
-projectCoverPaths = json.decode Content\load Path(Content.assetPath, "Script", "Dev", "ProjectCoverPaths.json")
+allEntries.projectCoverPaths = json.decode Content\load Path(Content.assetPath, "Script", "Dev", "ProjectCoverPaths.json")
 allEntries.scanDir = (path, dir, noPreview = false) ->
 	entries = []
 	unless dir\match "^%."
@@ -352,7 +352,7 @@ allEntries.scanDir = (path, dir, noPreview = false) ->
 					break nil if noPreview
 					break nil unless config.showPreview
 					projectCover = nil
-					for candidate in *projectCoverPaths
+					for candidate in *allEntries.projectCoverPaths
 						candidatePath = Path projectPath, candidate
 						if Content\exist candidatePath
 							projectCover = candidatePath

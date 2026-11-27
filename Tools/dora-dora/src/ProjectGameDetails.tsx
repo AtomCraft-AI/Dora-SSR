@@ -32,7 +32,6 @@ type Props = {
 	titles: Record<Language, string>; summaries: Record<Language, string>;
 	onTitle: (lang: Language, value: string) => void; onSummary: (lang: Language, value: string) => void;
 	readmes: Record<Language, ProjectReadme>; onReadme: (lang: Language, value: ProjectReadme) => void;
-	onEditing: (lang:Language, editing:boolean) => void;
 	disabled: boolean; reading: boolean; onGenerate: (lang: Language) => void; onSettings?: () => void;
 	label: (zh:string, en:string) => string;
 };
@@ -63,11 +62,10 @@ function DetailsPanel({lang, ...props}: Props & {lang:Language}) {
 			if (!result.success) throw new Error('write');
 			props.onReadme(lang, {path:edit.path, text:draft, exists:true});
 			setEdit(undefined);
-			props.onEditing(lang, false);
 		} catch { setError(label('README 保存失败，请重试。','Could not save the README. Please retry.')); }
 		finally { setSaving(false); }
 	}
-	return <div className="ap-language-panel" aria-hidden={!active} inert={!active} lang={lang}>
+	return <div className="project-details-language-panel" aria-hidden={!active} inert={!active} lang={lang}>
 		<Stack spacing={2} sx={{minWidth:0}}>
 			<TextField fullWidth size="small" label={label('作品标题','Title')} value={props.titles[lang]}
 				disabled={props.disabled} slotProps={{inputLabel:{shrink:true}, htmlInput:{maxLength:120}}}
@@ -79,14 +77,14 @@ function DetailsPanel({lang, ...props}: Props & {lang:Language}) {
 				<Stack direction="row" alignItems="center" justifyContent="space-between">
 					<FormLabel>{label('详细介绍','Description')}</FormLabel>
 					{!edit && <Button size="small" startIcon={<EditOutlined />} disabled={props.reading || !readme.path}
-						onClick={() => {setEdit(readme); props.onEditing(lang, true); setDraft(readme.text); setError('');}}>{label('编辑','Edit')}</Button>}
+						onClick={() => {setEdit(readme); setDraft(readme.text); setError('');}}>{label('编辑','Edit')}</Button>}
 				</Stack>
 				{edit ? <>
 					<TextField autoFocus fullWidth multiline minRows={5} maxRows={16} size="small" value={draft} label="Markdown"
 						disabled={saving} onChange={e => setDraft(e.target.value)} />
 					{error && <Typography color="error" role="alert">{error}</Typography>}
 					<Stack direction="row" justifyContent="flex-end" spacing={1}>
-						<Button disabled={saving} onClick={() => {setEdit(undefined); props.onEditing(lang, false);}}>{label('取消','Cancel')}</Button>
+						<Button disabled={saving} onClick={() => {setEdit(undefined);}}>{label('取消','Cancel')}</Button>
 						<Button variant="outlined" disabled={saving} onClick={save}>{label('保存 README','Save README')}</Button>
 					</Stack>
 				</> : readme.text ? <Box sx={{maxHeight:360, overflow:'auto', borderLeft:1, borderColor:'divider', pl:1.5}}>
@@ -102,7 +100,7 @@ function DetailsPanel({lang, ...props}: Props & {lang:Language}) {
 	</div>;
 }
 
-export default function AtomPieGameDetails(props: Props) {
+export default function ProjectGameDetails(props: Props) {
 	const {label, language} = props;
 	return <Paper component="section" variant="outlined" sx={{minWidth:0, bgcolor:Color.SurfaceRaised, borderColor:Color.Line, overflow:'hidden'}}>
 		<Stack direction="row" alignItems="center" justifyContent="space-between" gap={1} sx={{px:2.5, pt:2}}>
@@ -113,7 +111,7 @@ export default function AtomPieGameDetails(props: Props) {
 				<ToggleButton value="zh">中文</ToggleButton><ToggleButton value="en" sx={{textTransform:'none'}}>English</ToggleButton>
 			</ToggleButtonGroup>
 		</Stack>
-		<div className="ap-language-track" data-language={language}>
+		<div className="project-details-language-track" data-language={language}>
 			{languages.map(lang => <DetailsPanel key={lang} lang={lang} {...props} />)}
 		</div>
 		{props.onSettings && <Button size="small" sx={{mx:2, mb:1.5}} onClick={props.onSettings}>

@@ -13,7 +13,7 @@ const AgentPanel = React.lazy(() => import('./AgentPanel'));
 const DoraUpload = React.lazy(() => import('./Upload'));
 const GitPanel = React.lazy(() => import('./GitPanel'));
 
-const AtomPieSubmission = React.lazy(() => import('./AtomPieSubmission'));
+const ProjectDetails = React.lazy(() => import('./ProjectDetails'));
 
 function PanelFallback() {
 	return (
@@ -120,7 +120,7 @@ export default function ProjectWorkspacePanel(props: ProjectWorkspacePanelProps)
 		...(hasAgent ? [{ value: "agent" as const, label: t("agent.workspaceAgent") }] : []),
 		{ value: "upload", label: t("agent.workspaceFiles") },
 		{ value: "git", label: "Git" },
-		...(!isWorkspaceRoot ? [{ value: "submission" as const, label: t("agent.workspaceSubmission") }] : []),
+		...(!isWorkspaceRoot ? [{ value: "details" as const, label: t("agent.workspaceDetails") }] : []),
 	];
 
 	return (
@@ -194,12 +194,12 @@ export default function ProjectWorkspacePanel(props: ProjectWorkspacePanelProps)
 				</Stack>
 			</Box>
 			<Box sx={{ flex: 1, minHeight: 0 }}>
-				{!isWorkspaceRoot && (currentView === "submission" || mountedViews.has("submission")) && (
-					<Box hidden={currentView !== "submission"} sx={{ height: "100%" }}>
+				{!isWorkspaceRoot && (currentView === "details" || mountedViews.has("details")) && (
+					<Box hidden={currentView !== "details"} sx={{ height: "100%" }}>
 						<React.Suspense fallback={<PanelFallback />}>
-							<AtomPieSubmission key={uploadPath} project={uploadPath} repository={repositoryRoot ?? uploadPath}
+							<ProjectDetails key={uploadPath} project={uploadPath} repository={repositoryRoot ?? uploadPath}
 								fileUrl={props.fileUrl} onGenerateReadme={props.onGenerateReadme} onOpenFile={onOpenFile}
-								active={active && currentView === "submission"} onCardSaved={() => { void onRepositoryFilesChanged?.(uploadPath); }} />
+								active={active && currentView === "details"} onCardSaved={() => { void onRepositoryFilesChanged?.(uploadPath); }} />
 						</React.Suspense>
 					</Box>
 				)}

@@ -54,9 +54,6 @@ importers:
       '@mui/system':
         specifier: ^7.3.8
         version: 7.3.8(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6)(supports-color@7.2.0))(@types/react@19.2.15)(react@19.2.6)(supports-color@7.2.0))(@types/react@19.2.15)(react@19.2.6)
-      '@noble/hashes':
-        specifier: ^2.4.0
-        version: 2.4.0
       ace-builds:
         specifier: ^1.43.6
         version: 1.44.0
@@ -1281,10 +1278,6 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
-
-  '@noble/hashes@2.4.0':
-    resolution: {integrity: sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA==}
-    engines: {node: '>= 20.19.0'}
 
   '@oxc-project/types@0.133.0':
     resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
@@ -4966,8 +4959,6 @@ snapshots:
       '@emnapi/runtime': 1.10.0
       '@tybys/wasm-util': 0.10.2
     optional: true
-
-  '@noble/hashes@2.4.0': {}
 
   '@oxc-project/types@0.133.0': {}
 

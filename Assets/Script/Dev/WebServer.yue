@@ -15,8 +15,6 @@ HttpServer.wwwPath = Path Content.appPath, ".www"
 
 HttpServer.authToken = ""
 
-require("Script.Dev.AtomPie") api: "https://atompie.osgame.org/api/v1/dora"
-
 authFailedCount = 0
 authLockedUntil = 0.0
 
